@@ -1,0 +1,9 @@
+# Gizli ve hassas dosyalar
+.env
+
+# Kullanıcı verilerini içeren dosya
+plans.json
+
+# Python'un oluşturduğu geçici dosyalar
+__pycache__/
+*.pyc
