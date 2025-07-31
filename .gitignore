@@ -54,3 +54,5 @@ Thumbs.db
 # Geçici dosyalar
 *.tmp
 *.temp
+
+venv/
