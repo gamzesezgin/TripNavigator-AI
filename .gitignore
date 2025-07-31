@@ -1,9 +1,56 @@
 # Gizli ve hassas dosyalar
 .env
+.env.local
+.env.production
 
 # Kullanıcı verilerini içeren dosya
 plans.json
+*.json
 
 # Python'un oluşturduğu geçici dosyalar
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE ve editör dosyaları
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# İşletim sistemi dosyaları
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Streamlit özel dosyaları
+.streamlit/
+
+# Log dosyaları
+*.log
+
+# Geçici dosyalar
+*.tmp
+*.temp
