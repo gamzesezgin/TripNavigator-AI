@@ -4,7 +4,7 @@ from data_handler import load_plans, save_plans, get_current_week_tasks, mark_ta
 from datetime import datetime
 
 st.set_page_config(layout="wide")
-st.title("📊 Planlarım ve İlerleme Takibi")
+st.title("✈️ Seyahat Planlarım ve Aktivite Takibi")
 
 if 'confirming_delete' not in st.session_state:
     st.session_state.confirming_delete = None
@@ -12,28 +12,28 @@ if 'confirming_delete' not in st.session_state:
 all_plans = load_plans()
 
 if not all_plans:
-    st.info("Henüz kaydedilmiş bir planınız yok. 'Yeni Plan Oluştur' sayfasından ilk hedefinizi belirleyebilirsiniz!")
+    st.info("Henüz kaydedilmiş bir seyahat planınız yok. 'Yeni Seyahat Planı Oluştur' sayfasından ilk seyahatinizi planlayabilirsiniz!")
 else:
-    st.markdown("Aşağıda kayıtlı hedeflerinizi ve haftalık ilerleme durumunuzu görebilirsiniz.")
+    st.markdown("Aşağıda kayıtlı seyahat planlarınızı ve günlük aktivite durumunuzu görebilirsiniz.")
     
     for index, plan in enumerate(reversed(all_plans)):
         st.markdown("---")
         
         # Plan başlığı ve bilgileri
-        with st.expander(f"🎯 **Hedef:** {plan['goal']}", expanded=True):
+        with st.expander(f"✈️ **Seyahat:** {plan['goal']}", expanded=True):
             
             # Plan bilgileri
             col1, col2, col3 = st.columns([2, 1, 1])
             
             with col1:
-                st.subheader("📋 Tüm Haftalık Görevler")
+                st.subheader("🗺️ Tüm Günlük Aktiviteler")
                 
                 if plan.get('weekly_tasks'):
                     for week_tasks in plan['weekly_tasks']:
                         st.write(f"**📆 {week_tasks['day']}**")
                         
                         for task_index, task in enumerate(week_tasks['tasks']):
-                            # Bu görevin tamamlanıp tamamlanmadığını kontrol et
+                            # Bu aktivitenin tamamlanıp tamamlanmadığını kontrol et
                             is_completed = False
                             for completed_task in plan.get('completed_tasks', []):
                                 if (completed_task.get('day') == week_tasks.get('day') and 
@@ -41,7 +41,7 @@ else:
                                     is_completed = True
                                     break
                             
-                            # Checkbox ile görev durumu
+                            # Checkbox ile aktivite durumu
                             checkbox_key = f"task_{plan['id']}_{week_tasks['day']}_{task_index}"
                             checkbox_value = st.checkbox(
                                 task,
@@ -52,19 +52,19 @@ else:
                             # Checkbox durumu değiştiğinde işlem yap
                             if checkbox_value != is_completed:
                                 if checkbox_value:
-                                    # Görevi tamamlandı olarak işaretle
+                                    # Aktiviteyi tamamlandı olarak işaretle
                                     mark_task_completed(plan['id'], week_tasks['day'], task_index)
                                 else:
-                                    # Görevi tamamlanmamış olarak işaretle
+                                    # Aktiviteyi tamamlanmamış olarak işaretle
                                     unmark_task_completed(plan['id'], week_tasks['day'], task_index)
                                 st.rerun()
                         
                         st.markdown("---")
                 else:
-                    st.write("Bu plan için görev bulunmuyor.")
+                    st.write("Bu seyahat planı için aktivite bulunmuyor.")
             
             with col2:
-                st.subheader("📊 Haftalık İlerleme")
+                st.subheader("📊 Seyahat İlerlemesi")
                 
                 # Haftalık istatistikleri hesapla
                 stats = get_weekly_stats(plan)
@@ -74,7 +74,7 @@ else:
                     fig = go.Figure(go.Indicator(
                         mode = "gauge+number+delta",
                         value = stats['progress_percentage'],
-                        title = {'text': f"{stats['completed_tasks']} / {stats['total_tasks']} Görev"},
+                        title = {'text': f"{stats['completed_tasks']} / {stats['total_tasks']} Aktivite"},
                         delta = {'reference': 0},
                         gauge = {
                             'axis': {'range': [None, 100]},
@@ -94,30 +94,30 @@ else:
                     fig.update_layout(height=250, margin=dict(l=10, r=10, t=50, b=10))
                     st.plotly_chart(fig, use_container_width=True, key=f"chart_{plan['id']}")
                     
-                    # Başarı mesajı - Daha motivasyonel ve gerçekçi
+                    # Başarı mesajı - Seyahat odaklı
                     if stats['progress_percentage'] >= 90:
-                        st.success("🏆 Olağanüstü! Haftanın neredeyse tamamını tamamladınız!")
+                        st.success("🏆 Mükemmel! Seyahatinizin neredeyse tamamını tamamladınız!")
                     elif stats['progress_percentage'] >= 75:
-                        st.success("🎉 Harika! Haftanın büyük kısmını tamamladınız!")
+                        st.success("🎉 Harika! Seyahatinizin büyük kısmını tamamladınız!")
                     elif stats['progress_percentage'] >= 60:
-                        st.info("👍 Çok iyi gidiyorsunuz! Haftanın yarısından fazlasını tamamladınız!")
+                        st.info("👍 Çok iyi gidiyorsunuz! Seyahatinizin yarısından fazlasını tamamladınız!")
                     elif stats['progress_percentage'] >= 40:
-                        st.info("💪 İyi başlangıç! Haftanın önemli bir kısmını tamamladınız!")
+                        st.info("💪 İyi başlangıç! Seyahatinizin önemli bir kısmını tamamladınız!")
                     elif stats['progress_percentage'] >= 25:
-                        st.info("🌟 Başladınız! Her küçük adım önemli, devam edin!")
+                        st.info("🌟 Seyahate başladınız! Her aktivite unutulmaz anılar katıyor!")
                     elif stats['progress_percentage'] >= 10:
-                        st.info("🚀 Yolculuğa başladınız! Her görev size yaklaştırıyor!")
+                        st.info("🚀 Seyahat yolculuğuna başladınız! Her aktivite size yaklaştırıyor!")
                     else:
-                        st.info("💫 Hafta yeni başladı! İlk adımları atmaya hazırsınız!")
+                        st.info("💫 Seyahat yeni başladı! İlk aktiviteleri deneyimlemeye hazırsınız!")
                 else:
-                    st.write("Görev bulunmuyor.")
+                    st.write("Aktivite bulunmuyor.")
             
             with col3:
-                st.subheader("ℹ️ Plan Bilgileri")
+                st.subheader("ℹ️ Seyahat Bilgileri")
                 
-                # Öğrenme tarzı
+                # Seyahat tarzı
                 if plan.get('learning_style'):
-                    st.write(f"**Öğrenme Tarzı:**")
+                    st.write(f"**Seyahat Tarzı:**")
                     st.info(plan['learning_style'])
                 
                 # Motivasyon mesajı
@@ -131,13 +131,13 @@ else:
                     st.write(f"**📅 Oluşturulma:** {created_date.strftime('%d.%m.%Y')}")
                 
                 # Hafta bilgisi
-                st.write(f"**📊 Hafta:** {plan.get('current_week', 1)}")
+                st.write(f"**📊 Gün:** {plan.get('current_week', 1)}")
             
 
             
             # Silme butonu
             if st.session_state.confirming_delete == plan['id']:
-                st.warning("Bu plan kalıcı olarak silinecektir. Emin misiniz?")
+                st.warning("Bu seyahat planı kalıcı olarak silinecektir. Emin misiniz?")
                 c1, c2, _ = st.columns([1, 1, 4])
                 if c1.button("✅ Evet, Sil", key=f"confirm_delete_{plan['id']}", type="primary"):
                     original_plan_index = len(all_plans) - 1 - index
@@ -149,6 +149,6 @@ else:
                     st.session_state.confirming_delete = None
                     st.rerun()
             else:
-                if st.button("🗑️ Planı Sil", key=f"delete_{plan['id']}"):
+                if st.button("🗑️ Seyahat Planını Sil", key=f"delete_{plan['id']}"):
                     st.session_state.confirming_delete = plan['id']
                     st.rerun()

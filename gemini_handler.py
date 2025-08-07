@@ -5,206 +5,306 @@ import re
 
 def generate_goal_specific_questions(goal):
     """
-    Hedef bazında özelleştirilmiş sorular oluşturur.
+    Seyahat hedefi bazında özelleştirilmiş sorular oluşturur.
     """
     goal_lower = goal.lower()
     
-    # Diyet ve sağlık hedefleri için
-    if any(keyword in goal_lower for keyword in ['diyet', 'kilo', 'sağlık', 'beslenme', 'zayıflama', 'fitness', 'spor', 'egzersiz']):
+    # Kültür ve tarih turları için
+    if any(keyword in goal_lower for keyword in ['roma', 'paris', 'istanbul', 'atina', 'mısır', 'viyana', 'vienna', 'prag', 'prague', 'kültür', 'tarih', 'müze', 'bazilika', 'saray']):
         return [
             {
-                "question": "Daha önce diyet/spor deneyiminiz var mı?",
+                "question": "Seyahat tarzınız nasıl?",
                 "options": [
-                    "Evet, başarılı oldum ve sürdürdüm",
-                    "Evet ama sürdüremedim",
-                    "Ara sıra denedim",
-                    "Hiç denemedim, ilk kez"
+                    "Yoğun program, çok yer görmek istiyorum",
+                    "Orta tempoda, keyifli bir denge arıyorum",
+                    "Rahat, az yer ama detaylı keşif",
+                    "Esnek, anlık kararlarla ilerlemek"
                 ]
             },
             {
-                "question": "Günlük rutininiz nasıl?",
+                "question": "Hangi aktiviteleri tercih edersiniz?",
                 "options": [
-                    "Çok yoğun, az zamanım var",
-                    "Orta yoğunlukta, esnek zamanım var",
-                    "Rahat, çok zamanım var",
-                    "Değişken, düzenli değil"
+                    "Müzeler ve tarihi yerler",
+                    "Yerel kültür ve gelenekler",
+                    "Mimari ve sanat eserleri",
+                    "Hepsi dengeli bir şekilde"
                 ]
             },
             {
-                "question": "Motivasyon kaynağınız nedir?",
+                "question": "Günlük bütçeniz nasıl?",
                 "options": [
-                    "Sağlık ve uzun ömür",
-                    "Görünüm ve özgüven",
-                    "Sosyal baskı/çevre",
-                    "Kişisel hedef ve başarı"
+                    "Yüksek bütçe, lüks deneyimler",
+                    "Orta bütçe, kaliteli ama ekonomik",
+                    "Düşük bütçe, yerel deneyimler",
+                    "Karışık, bazı günler lüks bazı günler ekonomik"
                 ]
             },
             {
-                "question": "Hangi tür aktiviteleri tercih edersiniz?",
+                "question": "Yemek konusunda tercihiniz nedir?",
                 "options": [
-                    "Evde yapabileceğim egzersizler",
-                    "Spor salonu ve grup aktiviteleri",
-                    "Açık hava ve doğa aktiviteleri",
-                    "Yoga/pilates gibi sakin aktiviteler"
+                    "Yerel restoranlar ve geleneksel yemekler",
+                    "Lüks restoranlar ve fine dining",
+                    "Sokak yemekleri ve kafeler",
+                    "Karışık, her türlü deneyim"
                 ]
             },
             {
-                "question": "Beslenme konusunda hangi yaklaşımı tercih edersiniz?",
+                "question": "Rehber tercihiniz nedir?",
                 "options": [
-                    "Sıkı kurallar ve ölçümler",
-                    "Esnek ama bilinçli beslenme",
-                    "Hazır diyet programları",
-                    "Kendi tariflerim ve denemeler"
+                    "Profesyonel rehber eşliğinde",
+                    "Sesli rehber ve uygulamalar",
+                    "Kendi başıma keşfetmek",
+                    "Yerel arkadaşlar ve tavsiyeler"
                 ]
             }
         ]
     
-    # Öğrenme hedefleri için
-    elif any(keyword in goal_lower for keyword in ['öğren', 'çalış', 'ders', 'kurs', 'eğitim', 'okul', 'üniversite']):
+    # Doğa ve macera turları için
+    elif any(keyword in goal_lower for keyword in ['isviçre', 'norveç', 'yeni zelanda', 'doğa', 'trekking', 'hiking', 'dağ', 'orman', 'macera']):
         return [
             {
-                "question": "Öğrenme tarzınız nedir?",
+                "question": "Fiziksel aktivite seviyeniz nedir?",
                 "options": [
-                    "Görsel öğrenme (video, resim)",
-                    "İşitsel öğrenme (ses, konuşma)",
-                    "Kinestetik öğrenme (pratik, deneyim)",
-                    "Okuma/yazma odaklı"
+                    "Çok aktif, zorlu parkurlar",
+                    "Orta seviye, dengeli aktiviteler",
+                    "Hafif, yürüyüş odaklı",
+                    "Dinlenme ağırlıklı"
                 ]
             },
             {
-                "question": "Günlük çalışma süreniz ne kadar?",
+                "question": "Konaklama tercihiniz nedir?",
                 "options": [
-                    "30 dakika veya daha az",
-                    "1-2 saat",
-                    "3-4 saat",
-                    "5 saat veya daha fazla"
+                    "Dağ evleri ve kulübeler",
+                    "Kamp ve çadır",
+                    "Rahat oteller",
+                    "Karışık, deneyim çeşitliliği"
                 ]
             },
             {
-                "question": "Hangi ortamda daha iyi çalışırsınız?",
+                "question": "Hangi doğa aktivitelerini tercih edersiniz?",
                 "options": [
-                    "Sessiz ve düzenli ortam",
-                    "Müzik eşliğinde",
-                    "Grup çalışması",
-                    "Değişken ortamlar"
+                    "Trekking ve dağ yürüyüşleri",
+                    "Bisiklet ve su sporları",
+                    "Fotoğrafçılık ve gözlem",
+                    "Hepsi dengeli bir şekilde"
                 ]
             },
             {
-                "question": "Motivasyon kaynağınız nedir?",
+                "question": "İklim tercihiniz nedir?",
                 "options": [
-                    "Kariyer ve gelecek",
-                    "Kişisel gelişim",
-                    "Sosyal baskı",
-                    "İlgi ve merak"
+                    "Serin ve dağlık iklim",
+                    "Ilıman ve ormanlık",
+                    "Sıcak ve güneşli",
+                    "Değişken, mevsimsel"
                 ]
             },
             {
-                "question": "Hangi kaynakları tercih edersiniz?",
+                "question": "Grup seyahati tercihiniz nedir?",
                 "options": [
-                    "Video dersler ve online kurslar",
-                    "Kitaplar ve yazılı materyaller",
-                    "Pratik projeler ve uygulamalar",
-                    "Grup tartışmaları ve mentorluk"
+                    "Küçük grup turları",
+                    "Bireysel seyahat",
+                    "Aile/arkadaş grubu",
+                    "Karışık, esnek"
                 ]
             }
         ]
     
-    # Kariyer hedefleri için
-    elif any(keyword in goal_lower for keyword in ['kariyer', 'iş', 'meslek', 'profesyonel', 'çalışma']):
+    # Şehir turları için
+    elif any(keyword in goal_lower for keyword in ['new york', 'londra', 'tokyo', 'şehir', 'urban', 'metropol', 'alışveriş']):
         return [
             {
-                "question": "Kariyer hedefiniz nedir?",
+                "question": "Şehir deneyimi tercihiniz nedir?",
                 "options": [
-                    "Yeni bir alana geçiş",
-                    "Mevcut pozisyonda yükselme",
-                    "Yeni beceriler kazanma",
-                    "Kendi işini kurma"
+                    "Yoğun şehir hayatı ve gece hayatı",
+                    "Kültür ve sanat odaklı",
+                    "Alışveriş ve eğlence",
+                    "Karışık, her türlü deneyim"
                 ]
             },
             {
-                "question": "Günlük iş yoğunluğunuz nasıl?",
+                "question": "Ulaşım tercihiniz nedir?",
                 "options": [
-                    "Çok yoğun, az zamanım var",
-                    "Orta yoğunlukta",
-                    "Rahat, esnek zamanım var",
-                    "Değişken yoğunluk"
+                    "Toplu taşıma ve metro",
+                    "Yürüyüş ve bisiklet",
+                    "Taksi ve özel araç",
+                    "Karışık, duruma göre"
                 ]
             },
             {
-                "question": "Hangi tür gelişimi tercih edersiniz?",
+                "question": "Konaklama bölgesi tercihiniz nedir?",
                 "options": [
-                    "Teknik beceriler",
-                    "Liderlik ve yönetim",
-                    "İletişim ve networking",
-                    "Yaratıcılık ve inovasyon"
+                    "Şehir merkezi, turistik bölge",
+                    "Yerel mahalleler, otantik deneyim",
+                    "İş bölgesi, modern",
+                    "Karışık, farklı bölgeler"
                 ]
             },
             {
-                "question": "Öğrenme yönteminiz nedir?",
+                "question": "Günlük program yoğunluğu nasıl olsun?",
                 "options": [
-                    "Online kurslar ve sertifikalar",
-                    "Mentorluk ve koçluk",
-                    "Pratik projeler ve deneyim",
-                    "Konferanslar ve networking"
+                    "Çok yoğun, sabah akşam aktivite",
+                    "Orta yoğunluk, dinlenme araları",
+                    "Rahat, az aktivite",
+                    "Esnek, anlık kararlar"
                 ]
             },
             {
-                "question": "Zaman yönetimi yaklaşımınız nedir?",
+                "question": "Hangi şehir aktivitelerini tercih edersiniz?",
                 "options": [
-                    "Sıkı program ve planlama",
-                    "Esnek ama düzenli",
-                    "Anlık kararlar",
-                    "Haftalık hedefler"
+                    "Müzeler ve galeriler",
+                    "Alışveriş ve eğlence",
+                    "Yerel restoranlar ve kafeler",
+                    "Hepsi dengeli bir şekilde"
                 ]
             }
         ]
     
-    # Genel hedefler için varsayılan sorular
+    # Tatil ve dinlenme turları için
+    elif any(keyword in goal_lower for keyword in ['bali', 'santorini', 'maldivler', 'tatil', 'dinlenme', 'plaj', 'resort', 'spa']):
+        return [
+            {
+                "question": "Tatil tarzınız nedir?",
+                "options": [
+                    "Aktif tatil, spor ve aktiviteler",
+                    "Dinlenme odaklı, spa ve masaj",
+                    "Kültür ve doğa dengesi",
+                    "Lüks ve konfor odaklı"
+                ]
+            },
+            {
+                "question": "Konaklama tercihiniz nedir?",
+                "options": [
+                    "Lüks resort ve oteller",
+                    "Butik oteller ve pansiyonlar",
+                    "Villa ve özel konaklama",
+                    "Karışık, deneyim çeşitliliği"
+                ]
+            },
+            {
+                "question": "Günlük aktivite seviyeniz nedir?",
+                "options": [
+                    "Yoğun aktiviteler ve turlar",
+                    "Orta seviye, dinlenme araları",
+                    "Az aktivite, çok dinlenme",
+                    "Esnek, anlık kararlar"
+                ]
+            },
+            {
+                "question": "Yemek deneyimi tercihiniz nedir?",
+                "options": [
+                    "Lüks restoranlar ve fine dining",
+                    "Yerel restoranlar ve geleneksel",
+                    "Otel yemekleri ve all-inclusive",
+                    "Karışık, her türlü deneyim"
+                ]
+            },
+            {
+                "question": "Bütçe tercihiniz nedir?",
+                "options": [
+                    "Yüksek bütçe, lüks deneyimler",
+                    "Orta bütçe, kaliteli ama ekonomik",
+                    "Düşük bütçe, yerel deneyimler",
+                    "Karışık, bazı günler lüks"
+                ]
+            }
+        ]
+    
+    # Gastronomi turları için
+    elif any(keyword in goal_lower for keyword in ['tokyo', 'italya', 'fransa', 'gastronomi', 'yemek', 'şarap', 'kahve', 'çikolata']):
+        return [
+            {
+                "question": "Yemek deneyimi seviyeniz nedir?",
+                "options": [
+                    "Gurme, lüks restoranlar",
+                    "Yerel lezzetler ve sokak yemekleri",
+                    "Geleneksel ve otantik",
+                    "Karışık, her türlü deneyim"
+                ]
+            },
+            {
+                "question": "Hangi mutfak türünü tercih edersiniz?",
+                "options": [
+                    "Fine dining ve Michelin yıldızlı",
+                    "Yerel ve geleneksel",
+                    "Sokak yemekleri ve kafeler",
+                    "Hepsi dengeli bir şekilde"
+                ]
+            },
+            {
+                "question": "İçecek tercihiniz nedir?",
+                "options": [
+                    "Şarap ve kokteyl",
+                    "Kahve ve çay",
+                    "Yerel içecekler",
+                    "Karışık, her türlü"
+                ]
+            },
+            {
+                "question": "Yemek aktiviteleri tercihiniz nedir?",
+                "options": [
+                    "Yemek turları ve workshop'lar",
+                    "Pazar ziyaretleri ve alışveriş",
+                    "Restoran deneyimleri",
+                    "Karışık, her türlü aktivite"
+                ]
+            },
+            {
+                "question": "Bütçe tercihiniz nedir?",
+                "options": [
+                    "Yüksek bütçe, lüks deneyimler",
+                    "Orta bütçe, kaliteli ama ekonomik",
+                    "Düşük bütçe, yerel deneyimler",
+                    "Karışık, bazı günler lüks"
+                ]
+            }
+        ]
+    
+    # Genel seyahat hedefleri için varsayılan sorular
     else:
         return [
             {
-                "question": "Bu hedefe ulaşmak için hangi yaklaşımı tercih edersiniz?",
+                "question": "Seyahat tarzınız nedir?",
                 "options": [
-                    "Adım adım planlı ilerleme",
-                    "Esnek ve uyarlanabilir yaklaşım",
-                    "Yoğun ve hızlı ilerleme",
-                    "Sakin ve sürdürülebilir yaklaşım"
+                    "Yoğun program, çok yer görmek",
+                    "Orta tempoda, dengeli",
+                    "Rahat, az yer ama detaylı",
+                    "Esnek, anlık kararlar"
                 ]
             },
             {
-                "question": "Günlük zamanınız nasıl?",
+                "question": "Bütçe tercihiniz nedir?",
                 "options": [
-                    "Çok yoğun, az zamanım var",
-                    "Orta yoğunlukta",
-                    "Rahat, çok zamanım var",
-                    "Değişken zaman"
+                    "Yüksek bütçe, lüks deneyimler",
+                    "Orta bütçe, kaliteli ama ekonomik",
+                    "Düşük bütçe, yerel deneyimler",
+                    "Karışık, esnek bütçe"
                 ]
             },
             {
-                "question": "Motivasyon kaynağınız nedir?",
+                "question": "Konaklama tercihiniz nedir?",
                 "options": [
-                    "Kişisel başarı ve tatmin",
-                    "Dış baskı ve beklentiler",
-                    "Sosyal onay ve tanınma",
-                    "İçsel merak ve ilgi"
+                    "Lüks oteller ve resort'lar",
+                    "Butik oteller ve pansiyonlar",
+                    "Hostel ve ekonomik",
+                    "Karışık, deneyim çeşitliliği"
                 ]
             },
             {
-                "question": "Hangi tür aktiviteleri tercih edersiniz?",
+                "question": "Aktivite yoğunluğu nasıl olsun?",
                 "options": [
-                    "Yapılandırılmış ve düzenli",
-                    "Yaratıcı ve esnek",
-                    "Sosyal ve etkileşimli",
-                    "Bireysel ve odaklanmış"
+                    "Çok yoğun, sabah akşam aktivite",
+                    "Orta yoğunluk, dinlenme araları",
+                    "Az aktivite, çok dinlenme",
+                    "Esnek, anlık kararlar"
                 ]
             },
             {
-                "question": "İlerleme takibi konusunda nasılsınız?",
+                "question": "Rehber tercihiniz nedir?",
                 "options": [
-                    "Detaylı notlar ve ölçümler",
-                    "Genel gözlem ve his",
-                    "Düzenli değerlendirme",
-                    "Anlık geri bildirim"
+                    "Profesyonel rehber eşliğinde",
+                    "Sesli rehber ve uygulamalar",
+                    "Kendi başıma keşfetmek",
+                    "Yerel tavsiyeler ve arkadaşlar"
                 ]
             }
         ]
@@ -303,86 +403,50 @@ def generate_plan_with_gemini(goal, api_key, days=7, start_day=0):
     day_names = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
     selected_days = day_names[start_day:start_day + days]
     
+    # Dinamik JSON template oluştur
+    json_template = '{\n  "weekly_tasks": [\n'
+    
+    for i in range(days):
+        json_template += f'''    {{
+      "day": "{selected_days[i]}",
+      "tasks": [
+        "Spesifik seyahat aktivitesi 1 (sayısal değerlerle)",
+        "Spesifik seyahat aktivitesi 2 (sayısal değerlerle)",
+        "Spesifik seyahat aktivitesi 3 (sayısal değerlerle)"
+      ]
+    }}{"," if i < days - 1 else ""}\n'''
+    
+    json_template += '  ]\n}'
+    
     prompt = f"""
-Kullanıcının belirttiği hedef: "{goal}"
+Kullanıcının belirttiği seyahat hedefi: "{goal}"
 
-Bu hedefi detaylı şekilde analiz et ve {days} günlük bir plan oluştur. Her gün için 3-4 adet ÇOK SPESİFİK, ÖLÇÜLEBİLİR ve YAPILABİLİR görev belirle.
+Bu seyahat hedefini detaylı şekilde analiz et ve {days} günlük bir seyahat planı oluştur. Her gün için 3-4 adet ÇOK SPESİFİK, ÖLÇÜLEBİLİR ve YAPILABİLİR aktivite belirle.
 
-Görevler şu kriterlere uygun olmalı:
-- HEDEFE ÖZEL: Hedefle doğrudan ilgili ve spesifik
-- ÖLÇÜLEBİLİR: Sayısal değerler içermeli (örn: 10 kelime, 30 dakika, 1 bölüm)
+ÖNEMLİ: Kullanıcının belirttiği şehir/ülke için plan yap. Başka bir yer için plan yapma!
+
+Aktiviteler şu kriterlere uygun olmalı:
+- SEYAHAT ODAKLI: Hedefle doğrudan ilgili ve spesifik seyahat aktiviteleri
+- ÖLÇÜLEBİLİR: Sayısal değerler içermeli (örn: 2 saat, 1 saat, 30 dakika)
 - GÜNLÜK: O gün tamamlanabilir
-- SPESİFİK: Genel değil, net ve belirli
-- MOTİVASYONEL: Başarı hissi verecek
+- SPESİFİK: Genel değil, net ve belirli yerler/aktivite isimleri
+- MOTİVASYONEL: Unutulmaz deneyimler sunacak
 
 ÖRNEKLER:
-- İngilizce için: "10 yeni kelime ezberle", "1 bölüm İngilizce altyazılı dizi izle", "30 dakika İngilizce podcast dinle"
-- Diyet için: "Kahvaltıda 2 yumurta ve 1 dilim tam tahıllı ekmek ye", "Günde 2 litre su iç", "Akşam yemeğini 19:00'dan önce tamamla"
-- Spor için: "30 dakika yürüyüş yap", "20 şınav çek", "10 dakika plank yap"
+- Viyana kültür turu için: "Stephansdom Katedrali'ni ziyaret edin ve 1.5 saat boyunca gotik mimarisini inceleyin.", "Hofburg Sarayı'nda 2 saat geçirin ve İmparatorluk Apartmanları'nı gezin.", "Naschmarkt'ta 1 saat geçirin ve yerel lezzetleri tadın."
+- Paris sanat turu için: "Louvre Müzesi'ni ziyaret edin ve 3 saat boyunca Mona Lisa ve diğer başyapıtları inceleyin.", "Eiffel Kulesi'ne çıkın ve 1 saat boyunca Paris manzarasını seyredin.", "Montmartre'da 2 saat geçirin ve Sacré-Cœur Bazilikası'nı ziyaret edin."
+- Tokyo gastronomi turu için: "Tsukiji Dış Pazarı'nda 2 saat geçirin ve taze deniz ürünlerini keşfedin.", "Shibuya'da 1 saat geçirin ve meşhur kavşakta fotoğraf çekin.", "Akihabara'da 2 saat geçirin ve elektronik mağazalarını keşfedin."
 
 Cevabın SADECE aşağıdaki formatta bir JSON objesi olmalıdır:
-{{
-  "weekly_tasks": [
-    {{
-      "day": "{selected_days[0]}",
-      "tasks": [
-        "Spesifik görev 1 (sayısal değerlerle)",
-        "Spesifik görev 2 (sayısal değerlerle)",
-        "Spesifik görev 3 (sayısal değerlerle)"
-      ]
-    }}{f''',
-    {{
-      "day": "{selected_days[1]}",
-      "tasks": [
-        "Spesifik görev 1 (sayısal değerlerle)",
-        "Spesifik görev 2 (sayısal değerlerle)",
-        "Spesifik görev 3 (sayısal değerlerle)"
-      ]
-    }}''' if days > 1 else ''}{f''',
-    {{
-      "day": "{selected_days[2]}",
-      "tasks": [
-        "Spesifik görev 1 (sayısal değerlerle)",
-        "Spesifik görev 2 (sayısal değerlerle)",
-        "Spesifik görev 3 (sayısal değerlerle)"
-      ]
-    }}''' if days > 2 else ''}{f''',
-    {{
-      "day": "{selected_days[3]}",
-      "tasks": [
-        "Spesifik görev 1 (sayısal değerlerle)",
-        "Spesifik görev 2 (sayısal değerlerle)",
-        "Spesifik görev 3 (sayısal değerlerle)"
-      ]
-    }}''' if days > 3 else ''}{f''',
-    {{
-      "day": "{selected_days[4]}",
-      "tasks": [
-        "Spesifik görev 1 (sayısal değerlerle)",
-        "Spesifik görev 2 (sayısal değerlerle)",
-        "Spesifik görev 3 (sayısal değerlerle)"
-      ]
-    }}''' if days > 4 else ''}{f''',
-    {{
-      "day": "{selected_days[5]}",
-      "tasks": [
-        "Spesifik görev 1 (sayısal değerlerle)",
-        "Spesifik görev 2 (sayısal değerlerle)",
-        "Spesifik görev 3 (sayısal değerlerle)"
-      ]
-    }}''' if days > 5 else ''}{f''',
-    {{
-      "day": "{selected_days[6]}",
-      "tasks": [
-        "Spesifik görev 1 (sayısal değerlerle)",
-        "Spesifik görev 2 (sayısal değerlerle)",
-        "Spesifik görev 3 (sayısal değerlerle)"
-      ]
-    }}''' if days > 6 else ''}
-  ]
-}}
+{json_template}
 
-ÖNEMLİ: Her görev sayısal değerler içermeli ve çok spesifik olmalı. Genel görevler verme!
+ÖNEMLİ: 
+1. Her aktivite sayısal değerler içermeli ve çok spesifik olmalı. Genel aktiviteler verme!
+2. Kullanıcının belirttiği şehir/ülke için plan yap. Başka bir yer için plan yapma!
+3. Seyahat odaklı, yer isimleri ve sürelerle birlikte detaylı aktiviteler oluştur.
+4. Tam olarak {days} günlük plan oluştur, fazla veya eksik gün olmasın!
+5. GÜNLERİN SIRASINI DEĞİŞTİRME! Template'deki gün sırasını aynen kullan!
+6. İlk gün: {selected_days[0]}, son gün: {selected_days[-1]} olacak şekilde plan yap!
 Lütfen sadece JSON formatında yanıt ver, başka hiçbir açıklama ekleme.
 """
     

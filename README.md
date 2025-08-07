@@ -1,13 +1,13 @@
-# PlanifyAI - Akıllı Ajanda
+# TravelPlannerAI - Akıllı Seyahat Planlayıcısı
 
-PlanifyAI, kullanıcıların büyük hedeflerini yapay zeka yardımıyla yönetilebilir ve eyleme geçirilebilir adımlara bölmelerini sağlayan bir Streamlit uygulamasıdır.
+TravelPlannerAI, kullanıcıların seyahat hedeflerini yapay zeka yardımıyla yönetilebilir ve eyleme geçirilebilir günlük aktivitelere dönüştürmelerini sağlayan bir Streamlit uygulamasıdır.
 
 ## ✨ Özellikler
 
-- **Yapay Zeka Destekli Planlama:** Doğal dilde girilen bir hedefi, Google Gemini modelini kullanarak mantıksal alt görevlere ayırır.
-- **Plan Yönetimi:** Oluşturulan planları kaydeder ve yapılacaklar listesi olarak görüntüler.
-- **İlerleme Takibi:** Tamamlanan görevlere göre planın ilerlemesini görsel bir grafikle gösterir.
-- **Haftalık Odak:** O hafta tamamlanması gereken görevleri ayrı bir sekmede gösterir.
+- **Yapay Zeka Destekli Seyahat Planlama:** Doğal dilde girilen seyahat hedefini, Google Gemini modelini kullanarak mantıksal günlük aktivitelere ayırır.
+- **Seyahat Planı Yönetimi:** Oluşturulan seyahat planlarını kaydeder ve aktivite listesi olarak görüntüler.
+- **Aktivite Takibi:** Tamamlanan aktivitelere göre seyahat planının ilerlemesini görsel bir grafikle gösterir.
+- **Haftalık Program:** O hafta tamamlanması gereken aktiviteleri ayrı bir sekmede gösterir.
 
 ## 🚀 Kurulum ve Çalıştırma
 
