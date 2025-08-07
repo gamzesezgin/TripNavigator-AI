@@ -1,7 +1,7 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="TravelifyAI - Akıllı Seyahat Planlayıcısı",
+    page_title="Trip Navigator AI - Akıllı Seyahat Planlayıcısı",
     page_icon="✈️",
     layout="wide",
 )
@@ -55,9 +55,9 @@ st.markdown("""
 # 1. Hero Section
 st.markdown("""
 <div class="hero-section">
-    <h1 style="font-size: 3rem; margin-bottom: 1rem;">✈️ TravelifyAI'ye Hoş Geldin!</h1>
+    <h1 style="font-size: 3rem; margin-bottom: 1rem;">✈️ Trip Navigator AI'ye Hoş Geldin!</h1>
     <h2 style="font-size: 1.5rem; margin-bottom: 2rem; opacity: 0.9;">Yapay Zekâ Destekli Kişiselleştirilmiş Seyahat Planlayıcın</h2>
-    <p style="font-size: 1.2rem; margin-bottom: 2rem;">TravelifyAI, hayalindeki seyahati detaylı günlük planlara dönüştüren akıllı asistanın.</p>
+    <p style="font-size: 1.2rem; margin-bottom: 2rem;">Hayalindeki seyahati detaylı günlük planlara dönüştüren akıllı asistanın.</p>
     <p style="margin-top: 2rem; font-size: 1.1rem;">🚀 Mükemmel seyahat planını oluşturmaya başlayalım!</p>
 </div>
 """, unsafe_allow_html=True)

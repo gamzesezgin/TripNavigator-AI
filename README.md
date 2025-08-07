@@ -1,6 +1,6 @@
-# TravelPlannerAI - Akıllı Seyahat Planlayıcısı
+# <Trip Navigator AI> - Akıllı Seyahat Planlayıcısı
 
-TravelPlannerAI, kullanıcıların seyahat hedeflerini yapay zeka yardımıyla yönetilebilir ve eyleme geçirilebilir günlük aktivitelere dönüştürmelerini sağlayan bir Streamlit uygulamasıdır.
+Trip Navigator AI, kullanıcıların seyahat hedeflerini yapay zeka yardımıyla yönetilebilir ve eyleme geçirilebilir günlük aktivitelere dönüştürmelerini sağlayan bir Streamlit uygulamasıdır.
 
 ## ✨ Özellikler
 
