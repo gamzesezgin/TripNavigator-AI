@@ -15,7 +15,7 @@ st.markdown("Birkaç soruyla sana en uygun seyahat destinasyonunu önereyim!")
 # Sayfa yüklendiğinde session state kontrolü
 if st.session_state.get('ai_plan_created', False):
     # Plan oluşturuldu, session state'i temizle
-    for key in ['ai_step', 'ai_answers', 'recommended_destination', 'plan_days', 'start_day', 'ai_plan_created']:
+    for key in ['ai_step', 'ai_answers', 'recommended_destination', 'selected_destination_description', 'plan_days', 'start_day', 'ai_plan_created']:
         if key in st.session_state:
             del st.session_state[key]
     st.rerun()
@@ -27,6 +27,8 @@ if 'ai_answers' not in st.session_state:
     st.session_state.ai_answers = {}
 if 'recommended_destination' not in st.session_state:
     st.session_state.recommended_destination = ""
+if 'selected_destination_description' not in st.session_state:
+    st.session_state.selected_destination_description = ""
 if 'plan_days' not in st.session_state:
     st.session_state.plan_days = 7
 if 'start_day' not in st.session_state:
@@ -149,60 +151,113 @@ if st.session_state.ai_step == 1:
 # Adım 2: Destinasyon Önerisi
 elif st.session_state.ai_step == 2:
     st.subheader("🤖 Adım 2: AI Destinasyon Önerisi")
-    st.markdown("Cevaplarınıza göre size en uygun destinasyonu öneriyorum...")
+    st.markdown("Cevaplarınıza göre size en uygun destinasyonları öneriyorum...")
     
-    with st.spinner("🤖 AI analiz yapıyor ve en uygun destinasyonu buluyor..."):
+    with st.spinner("🤖 AI analiz yapıyor ve en uygun destinasyonları buluyor..."):
         # AI'dan destinasyon önerisi al
         api_key = os.getenv('GEMINI_API_KEY')
         
         if api_key:
             try:
                 # Kullanıcı cevaplarını analiz et ve destinasyon öner
-                recommended_destination = generate_ai_destination_recommendation(
+                recommended_destinations = generate_ai_destination_recommendation(
                     st.session_state.ai_answers, api_key
                 )
                 
-                if recommended_destination:
-                    st.session_state.recommended_destination = recommended_destination
-                    st.success(f"🎉 Size önerilen destinasyon: **{recommended_destination}**")
+                if recommended_destinations and len(recommended_destinations) >= 3:
+                    st.success("🎉 Size önerilen 3 destinasyon:")
                     
-                    # Debug bilgisi
-                    st.info(f"🔍 **Debug Bilgisi:** AI'dan gelen yanıt işlendi ve '{recommended_destination}' seçildi.")
+                    # 3 destinasyonu göster ve seçim yaptır
+                    st.markdown("**🌟 Lütfen size en uygun olan destinasyonu seçin:**")
                     
-                    # Öneri gerekçesi
-                    st.info("💡 **Öneri Gerekçesi:**")
-                    st.write(generate_recommendation_reasoning(st.session_state.ai_answers, recommended_destination))
+                    # Destinasyonları kartlar halinde göster
+                    col1, col2, col3 = st.columns(3)
                     
-                    st.markdown("---")
+                    with col1:
+                        st.markdown(f"""
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                   padding: 1.5rem; border-radius: 15px; text-align: center; color: white; margin-bottom: 1rem;">
+                            <h4 style="color: white; margin-bottom: 1rem;">🏆 1. Seçenek</h4>
+                            <h3 style="color: white; margin-bottom: 0.5rem;">{recommended_destinations[0]['name']}</h3>
+                            <p style="color: white; font-size: 0.9rem;">{recommended_destinations[0]['description']}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        if st.button(f"✅ {recommended_destinations[0]['name']} Seç", key="dest1", use_container_width=True):
+                            st.session_state.recommended_destination = recommended_destinations[0]['name']
+                            st.session_state.selected_destination_description = recommended_destinations[0]['description']
+                            st.rerun()
                     
-                    # Seyahat süresi seçimi
-                    st.subheader("📅 Seyahat Süresi")
-                    st.markdown("Önerilen destinasyon için kaç günlük bir seyahat planı istiyorsunuz?")
+                    with col2:
+                        st.markdown(f"""
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+                                   padding: 1.5rem; border-radius: 15px; text-align: center; color: white; margin-bottom: 1rem;">
+                            <h4 style="color: white; margin-bottom: 1rem;">🥈 2. Seçenek</h4>
+                            <h3 style="color: white; margin-bottom: 0.5rem;">{recommended_destinations[1]['name']}</h3>
+                            <p style="color: white; font-size: 0.9rem;">{recommended_destinations[1]['description']}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        if st.button(f"✅ {recommended_destinations[1]['name']} Seç", key="dest2", use_container_width=True):
+                            st.session_state.recommended_destination = recommended_destinations[1]['name']
+                            st.session_state.selected_destination_description = recommended_destinations[1]['description']
+                            st.rerun()
                     
-                    plan_days = st.slider(
-                        "Gün sayısı:",
-                        min_value=1,
-                        max_value=7,
-                        value=5,
-                        step=1
-                    )
+                    with col3:
+                        st.markdown(f"""
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+                                   padding: 1.5rem; border-radius: 15px; text-align: center; color: white; margin-bottom: 1rem;">
+                            <h4 style="color: white; margin-bottom: 1rem;">🥉 3. Seçenek</h4>
+                            <h3 style="color: white; margin-bottom: 0.5rem;">{recommended_destinations[2]['name']}</h3>
+                            <p style="color: white; font-size: 0.9rem;">{recommended_destinations[2]['description']}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        if st.button(f"✅ {recommended_destinations[2]['name']} Seç", key="dest3", use_container_width=True):
+                            st.session_state.recommended_destination = recommended_destinations[2]['name']
+                            st.session_state.selected_destination_description = recommended_destinations[2]['description']
+                            st.rerun()
                     
-                    # Başlangıç günü seçimi
-                    st.markdown("**🎯 Başlangıç Günü:**")
-                    day_names = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
-                    
-                    start_day = st.radio(
-                        "Seyahatiniz hangi günden başlasın?",
-                        options=day_names,
-                        index=0,
-                        horizontal=True
-                    )
-                    
-                    if st.button("🎯 Bu Destinasyon İçin Plan Oluştur!", type="primary"):
-                        st.session_state.plan_days = plan_days
-                        st.session_state.start_day = day_names.index(start_day)
-                        st.session_state.ai_step = 3
-                        st.rerun()
+                    # Seçim yapıldıysa devam et
+                    if 'recommended_destination' in st.session_state and st.session_state.recommended_destination:
+                        st.markdown("---")
+                        st.success(f"🎯 **Seçilen Destinasyon:** {st.session_state.recommended_destination}")
+                        
+                        # Öneri gerekçesi
+                        st.info("💡 **Öneri Gerekçesi:**")
+                        st.write(generate_recommendation_reasoning(st.session_state.ai_answers, st.session_state.recommended_destination))
+                        
+                        st.markdown("---")
+                        
+                        # Seyahat süresi seçimi
+                        st.subheader("📅 Seyahat Süresi")
+                        st.markdown("Seçilen destinasyon için kaç günlük bir seyahat planı istiyorsunuz?")
+                        
+                        plan_days = st.slider(
+                            "Gün sayısı:",
+                            min_value=1,
+                            max_value=7,
+                            value=5,
+                            step=1
+                        )
+                        
+                        # Başlangıç günü seçimi
+                        st.markdown("**🎯 Başlangıç Günü:**")
+                        day_names = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
+                        
+                        start_day = st.radio(
+                            "Seyahatiniz hangi günden başlasın?",
+                            options=day_names,
+                            index=0,
+                            horizontal=True
+                        )
+                        
+                        if st.button("🎯 Bu Destinasyon İçin Plan Oluştur!", type="primary"):
+                            st.session_state.plan_days = plan_days
+                            st.session_state.start_day = day_names.index(start_day)
+                            st.session_state.ai_step = 3
+                            st.rerun()
+                
                 else:
                     st.error("❌ AI servisi şu anda yanıt veremiyor. Lütfen daha sonra tekrar deneyin.")
                     if st.button("🔄 Tekrar Dene"):
@@ -274,7 +329,7 @@ elif st.session_state.ai_step == 3:
         # Yeni plan oluştur butonu
         if st.button("🆕 Yeni AI Önerisi Al", key="new_ai_plan_button"):
             # Session state'i tamamen temizle
-            for key in ['ai_step', 'ai_answers', 'recommended_destination', 'plan_days', 'start_day', 'ai_plan_created']:
+            for key in ['ai_step', 'ai_answers', 'recommended_destination', 'selected_destination_description', 'plan_days', 'start_day', 'ai_plan_created']:
                 if key in st.session_state:
                     del st.session_state[key]
             st.rerun()

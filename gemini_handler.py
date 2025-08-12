@@ -1282,7 +1282,7 @@ def generate_general_recommendations(goal, personality_type, answers):
 # AI Destinasyon Önerisi Fonksiyonları
 def generate_ai_destination_recommendation(answers, api_key):
     """
-    Kullanıcı cevaplarına göre AI'dan destinasyon önerisi alır
+    Kullanıcı cevaplarına göre AI'dan 3 destinasyon önerisi alır
     """
     # AI öneri soruları tanımları
     ai_questions = [
@@ -1365,11 +1365,11 @@ Ulaşım: {ai_questions[8]['options'][answers.get('transport', 0)]}
 
 Bu tercihlere göre dünyadaki en uygun 3 destinasyon öner. 
 
-ÖNEMLİ: Sadece şehir ve ülke isimlerini ver, başka açıklama ekleme.
+ÖNEMLİ: Her destinasyon için kısa bir açıklama da ekle.
 Örnek format:
-1. Şehir Adı, Ülke Adı
-2. Şehir Adı, Ülke Adı
-3. Şehir Adı, Ülke Adı
+1. Şehir Adı, Ülke Adı - Kısa açıklama
+2. Şehir Adı, Ülke Adı - Kısa açıklama  
+3. Şehir Adı, Ülke Adı - Kısa açıklama
 
 Sadece bu formatta yanıt ver, başka hiçbir şey yazma.
 """
@@ -1380,7 +1380,7 @@ Sadece bu formatta yanıt ver, başka hiçbir şey yazma.
       "contents": [{"parts": [{"text": prompt}]}],
       "generationConfig": {
         "temperature": 0.7,
-        "maxOutputTokens": 200,
+        "maxOutputTokens": 300,
       }
     }
     
@@ -1405,6 +1405,8 @@ Sadece bu formatta yanıt ver, başka hiçbir şey yazma.
             # Satırlara böl
             lines = content.split('\n')
             
+            destinations = []
+            
             # Her satırı kontrol et
             for line in lines:
                 line = line.strip()
@@ -1418,80 +1420,198 @@ Sadece bu formatta yanıt ver, başka hiçbir şey yazma.
                     # Numarayı kaldır ve temizle
                     clean_line = line.replace('1.', '').replace('2.', '').replace('3.', '').strip()
                     
-                    # Virgül ile ayrılmış şehir, ülke formatını kontrol et
-                    if ',' in clean_line:
-                        destination = clean_line.strip()
+                    # Tire ile ayrılmış formatı kontrol et
+                    if ' - ' in clean_line:
+                        parts = clean_line.split(' - ', 1)
+                        destination = parts[0].strip()
+                        description = parts[1].strip() if len(parts) > 1 else ""
+                        
                         if len(destination) > 3:  # En az 3 karakter olmalı
-                            print(f"Bulunan destinasyon: {destination}")
-                            return destination
+                            destinations.append({
+                                "name": destination,
+                                "description": description
+                            })
+                            print(f"Bulunan destinasyon: {destination} - {description}")
                 
                 # Numarasız satırları da kontrol et
-                elif ',' in line and len(line) > 3:
-                    # Virgül içeren ve yeterince uzun satırları kabul et
-                    destination = line.strip()
-                    print(f"Numarasız destinasyon bulundu: {destination}")
-                    return destination
+                elif ' - ' in line and len(line) > 3:
+                    parts = line.split(' - ', 1)
+                    destination = parts[0].strip()
+                    description = parts[1].strip() if len(parts) > 1 else ""
+                    
+                    if len(destination) > 3:
+                        destinations.append({
+                            "name": destination,
+                            "description": description
+                        })
+                        print(f"Numarasız destinasyon bulundu: {destination} - {description}")
             
-            # Eğer hiçbir geçerli format bulunamazsa, ilk geçerli satırı al
-            for line in lines:
-                line = line.strip()
-                if line and len(line) > 3 and not line.startswith('1.') and not line.startswith('2.') and not line.startswith('3.'):
-                    if ',' in line:  # Virgül içermeli
-                        print(f"Son çare destinasyon: {line}")
-                        return line
+            # Eğer 3 destinasyon bulunduysa döndür
+            if len(destinations) >= 3:
+                return destinations[:3]  # İlk 3'ünü al
             
-            # Hiçbir geçerli format bulunamazsa, kullanıcı tercihlerine göre öneri yap
-            print("AI yanıtından destinasyon bulunamadı, tercihlere göre öneri yapılıyor...")
-            return generate_destination_by_preferences(answers, ai_questions)
+            # Eğer 1-2 destinasyon bulunduysa, fallback ile tamamla
+            elif len(destinations) > 0:
+                fallback_destinations = generate_fallback_destinations(answers, ai_questions, destinations)
+                return fallback_destinations[:3]
+            
+            # Hiçbir destinasyon bulunamazsa, tamamen fallback kullan
+            else:
+                print("AI yanıtından destinasyon bulunamadı, fallback kullanılıyor...")
+                fallback_destinations = generate_fallback_destinations(answers, ai_questions, [])
+                return fallback_destinations[:3]
             
         else:
             print("API yanıtında candidates bulunamadı")
-            return generate_destination_by_preferences(answers, ai_questions)
+            fallback_destinations = generate_fallback_destinations(answers, ai_questions, [])
+            return fallback_destinations[:3]
             
     except Exception as e:
         print(f"AI önerisi alınırken hata: {e}")
-        return generate_destination_by_preferences(answers, ai_questions)
+        fallback_destinations = generate_fallback_destinations(answers, ai_questions, [])
+        return fallback_destinations[:3]
 
-def generate_destination_by_preferences(answers, ai_questions):
+def generate_fallback_destinations(answers, ai_questions, existing_destinations):
     """
-    AI yanıtı alınamadığında kullanıcı tercihlerine göre destinasyon önerir
+    AI yanıtı alınamadığında kullanıcı tercihlerine göre 3 destinasyon önerir
     """
     climate = ai_questions[0]['options'][answers.get('climate', 0)]
     activity = ai_questions[2]['options'][answers.get('activity', 0)]
     distance = ai_questions[4]['options'][answers.get('distance', 0)]
+    budget = ai_questions[1]['options'][answers.get('budget', 0)]
     
-    # İklim tercihine göre öneri
+    destinations = []
+    
+    # Mevcut destinasyonları ekle
+    for dest in existing_destinations:
+        destinations.append(dest)
+    
+    # İklim tercihine göre öneriler
     if "sıcak" in climate.lower():
         if "yakın" in distance.lower():
-            return "Antalya, Türkiye"
+            if not any("Antalya" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Antalya, Türkiye",
+                    "description": "Sıcak iklim, tarihi ve doğal güzellikler, ekonomik seyahat"
+                })
+            if not any("Barselona" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Barselona, İspanya",
+                    "description": "Sıcak iklim, kültür, sanat ve gastronomi"
+                })
         else:
-            return "Bangkok, Tayland"
+            if not any("Bangkok" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Bangkok, Tayland",
+                    "description": "Sıcak iklim, egzotik kültür, uygun fiyatlar"
+                })
+            if not any("Bali" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Bali, Endonezya",
+                    "description": "Sıcak iklim, doğa, spa ve huzur"
+                })
+    
     elif "serin" in climate.lower():
         if "yakın" in distance.lower():
-            return "İsviçre Alpleri, İsviçre"
+            if not any("İsviçre" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "İsviçre Alpleri, İsviçre",
+                    "description": "Serin iklim, doğa sporları, lüks deneyim"
+                })
+            if not any("Norveç" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Bergen, Norveç",
+                    "description": "Serin iklim, fiyordlar, doğa macerası"
+                })
         else:
-            return "Banff, Kanada"
-    elif "doğa" in activity.lower() or "macera" in activity.lower():
+            if not any("Banff" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Banff, Kanada",
+                    "description": "Serin iklim, dağ manzaraları, doğa aktiviteleri"
+                })
+            if not any("Yeni Zelanda" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Queenstown, Yeni Zelanda",
+                    "description": "Serin iklim, macera sporları, doğal güzellikler"
+                })
+    
+    # Aktivite tercihine göre öneriler
+    if "doğa" in activity.lower() or "macera" in activity.lower():
         if "yakın" in distance.lower():
-            return "İsviçre Alpleri, İsviçre"
+            if not any("İsviçre" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "İsviçre Alpleri, İsviçre",
+                    "description": "Doğa sporları, trekking, dağ aktiviteleri"
+                })
         else:
-            return "Queenstown, Yeni Zelanda"
+            if not any("Yeni Zelanda" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Queenstown, Yeni Zelanda",
+                    "description": "Macera sporları, doğa aktiviteleri, ekstrem sporlar"
+                })
+    
     elif "tarih" in activity.lower() or "kültür" in activity.lower():
         if "yakın" in distance.lower():
-            return "Roma, İtalya"
+            if not any("Roma" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Roma, İtalya",
+                    "description": "Tarihi ve kültürel miras, antik uygarlık"
+                })
         else:
-            return "Kyoto, Japonya"
+            if not any("Kyoto" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Kyoto, Japonya",
+                    "description": "Geleneksel kültür, tapınaklar, tarihi atmosfer"
+                })
+    
     elif "sanat" in activity.lower() or "gastronomi" in activity.lower():
         if "yakın" in distance.lower():
-            return "Paris, Fransa"
+            if not any("Paris" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Paris, Fransa",
+                    "description": "Sanat, gastronomi, lüks deneyim"
+                })
         else:
-            return "Tokyo, Japonya"
-    else:
-        # Varsayılan öneriler
+            if not any("Tokyo" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Tokyo, Japonya",
+                    "description": "Modern sanat, geleneksel mutfak, kültür"
+                })
+    
+    # Bütçe tercihine göre öneriler
+    if "düşük" in budget.lower():
+        if not any("Türkiye" in d["name"] for d in destinations):
+            destinations.append({
+                "name": "İstanbul, Türkiye",
+                "description": "Ekonomik seyahat, tarih, kültür ve lezzetli mutfak"
+            })
+    
+    # Eğer hala 3'ten azsa, genel öneriler ekle
+    while len(destinations) < 3:
         if "yakın" in distance.lower():
-            return "Barselona, İspanya"
+            if not any("Prag" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Prag, Çek Cumhuriyeti",
+                    "description": "Orta çağ atmosferi, uygun fiyatlar, güzel mimari"
+                })
+            elif not any("Budapeşte" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Budapeşte, Macaristan",
+                    "description": "Tarihi şehir, termal banyolar, ekonomik seyahat"
+                })
         else:
-            return "San Francisco, ABD"
+            if not any("Singapur" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Singapur",
+                    "description": "Modern şehir, kültür karışımı, temizlik"
+                })
+            elif not any("Melbourne" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Melbourne, Avustralya",
+                    "description": "Kültür şehri, sanat, gastronomi ve doğa"
+                })
+    
+    return destinations[:3]
 
 def generate_recommendation_reasoning(answers, destination):
     """
