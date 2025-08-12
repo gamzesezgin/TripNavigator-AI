@@ -63,7 +63,7 @@ ai_questions = [
     {
         "id": "distance",
         "question": "🌍 Kıta veya mesafe tercihiniz nedir?",
-        "options": ["Yakın (Avrupa/Türkiye)", "Uzak (Asya/Amerika)", "Fark etmez"],
+        "options": ["Türkiye içi", "Avrupa (yakın)", "Uzak (Asya/Amerika/Afrika)", "Fark etmez"],
         "category": "distance"
     },
     {

@@ -1313,7 +1313,7 @@ def generate_ai_destination_recommendation(answers, api_key):
         {
             "id": "distance",
             "question": "🌍 Kıta veya mesafe tercihiniz nedir?",
-            "options": ["Yakın (Avrupa/Türkiye)", "Uzak (Asya/Amerika)", "Fark etmez"],
+            "options": ["Türkiye içi", "Avrupa (yakın)", "Uzak (Asya/Amerika/Afrika)", "Fark etmez"],
             "category": "distance"
         },
         {
@@ -1365,7 +1365,14 @@ Ulaşım: {ai_questions[8]['options'][answers.get('transport', 0)]}
 
 Bu tercihlere göre dünyadaki en uygun 3 destinasyon öner. 
 
-ÖNEMLİ: Her destinasyon için kısa bir açıklama da ekle.
+ÖNEMLİ: 
+- Eğer "Türkiye içi" seçildiyse, SADECE Türkiye içi destinasyonlar öner (İstanbul, Antalya, Kapadokya gibi)
+- Eğer "Avrupa (yakın)" seçildiyse, SADECE Avrupa destinasyonları öner (Paris, Roma, Barselona gibi)  
+- Eğer "Uzak" seçildiyse, farklı kıtalardan destinasyonlar öner (Tokyo, New York, Bangkok gibi)
+- Her destinasyon için kısa bir açıklama da ekle
+- Mesafe tercihine kesinlikle uy, yanlış kıta önerme!
+- Türkiye seçildiyse İspanya, İtalya gibi ülkeleri önerme!
+
 Örnek format:
 1. Şehir Adı, Ülke Adı - Kısa açıklama
 2. Şehir Adı, Ülke Adı - Kısa açıklama  
@@ -1486,33 +1493,70 @@ def generate_fallback_destinations(answers, ai_questions, existing_destinations)
     for dest in existing_destinations:
         destinations.append(dest)
     
-    # İklim tercihine göre öneriler
-    if "sıcak" in climate.lower():
-        if "yakın" in distance.lower():
+    # Mesafe tercihine göre öneriler
+    if "türkiye" in distance.lower():
+        # Türkiye içi destinasyonlar
+        if "sıcak" in climate.lower():
             if not any("Antalya" in d["name"] for d in destinations):
                 destinations.append({
                     "name": "Antalya, Türkiye",
                     "description": "Sıcak iklim, tarihi ve doğal güzellikler, ekonomik seyahat"
                 })
+            if not any("Bodrum" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Bodrum, Türkiye",
+                    "description": "Sıcak iklim, mavi bayraklı plajlar, eğlence hayatı"
+                })
+        elif "serin" in climate.lower():
+            if not any("Bolu" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Bolu, Türkiye",
+                    "description": "Serin iklim, doğa, göller ve dağ aktiviteleri"
+                })
+            if not any("Trabzon" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Trabzon, Türkiye",
+                    "description": "Serin iklim, yeşil doğa, tarihi yaylalar"
+                })
+        
+        # Aktivite tercihine göre Türkiye önerileri
+        if "tarih" in activity.lower() or "kültür" in activity.lower():
+            if not any("İstanbul" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "İstanbul, Türkiye",
+                    "description": "Tarihi ve kültürel miras, iki kıtada konum, lezzetli mutfak"
+                })
+            if not any("Kapadokya" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Kapadokya, Türkiye",
+                    "description": "Tarihi peribacaları, sıcak hava balonları, doğal güzellikler"
+                })
+        elif "doğa" in activity.lower() or "macera" in activity.lower():
+            if not any("Rize" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Rize, Türkiye",
+                    "description": "Doğa sporları, yayla turizmi, çay bahçeleri"
+                })
+            if not any("Kars" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Kars, Türkiye",
+                    "description": "Kış sporları, tarihi kale, doğal güzellikler"
+                })
+    
+    elif "avrupa" in distance.lower():
+        # Avrupa destinasyonları
+        if "sıcak" in climate.lower():
             if not any("Barselona" in d["name"] for d in destinations):
                 destinations.append({
                     "name": "Barselona, İspanya",
                     "description": "Sıcak iklim, kültür, sanat ve gastronomi"
                 })
-        else:
-            if not any("Bangkok" in d["name"] for d in destinations):
+            if not any("Roma" in d["name"] for d in destinations):
                 destinations.append({
-                    "name": "Bangkok, Tayland",
-                    "description": "Sıcak iklim, egzotik kültür, uygun fiyatlar"
+                    "name": "Roma, İtalya",
+                    "description": "Sıcak iklim, tarihi ve kültürel miras, lezzetli mutfak"
                 })
-            if not any("Bali" in d["name"] for d in destinations):
-                destinations.append({
-                    "name": "Bali, Endonezya",
-                    "description": "Sıcak iklim, doğa, spa ve huzur"
-                })
-    
-    elif "serin" in climate.lower():
-        if "yakın" in distance.lower():
+        elif "serin" in climate.lower():
             if not any("İsviçre" in d["name"] for d in destinations):
                 destinations.append({
                     "name": "İsviçre Alpleri, İsviçre",
@@ -1523,7 +1567,45 @@ def generate_fallback_destinations(answers, ai_questions, existing_destinations)
                     "name": "Bergen, Norveç",
                     "description": "Serin iklim, fiyordlar, doğa macerası"
                 })
-        else:
+        
+        # Aktivite tercihine göre Avrupa önerileri
+        if "tarih" in activity.lower() or "kültür" in activity.lower():
+            if not any("Paris" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Paris, Fransa",
+                    "description": "Sanat, gastronomi, lüks deneyim"
+                })
+            if not any("Viyana" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Viyana, Avusturya",
+                    "description": "Müzik kültürü, tarihi saraylar, klasik sanat"
+                })
+        elif "sanat" in activity.lower() or "gastronomi" in activity.lower():
+            if not any("Firenze" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Firenze, İtalya",
+                    "description": "Rönesans sanatı, şarap kültürü, tarihi merkez"
+                })
+            if not any("Amsterdam" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Amsterdam, Hollanda",
+                    "description": "Modern sanat, bisiklet kültürü, kanal turu"
+                })
+    
+    elif "uzak" in distance.lower():
+        # Uzak destinasyonlar (Asya, Amerika, Afrika, Okyanusya)
+        if "sıcak" in climate.lower():
+            if not any("Bangkok" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Bangkok, Tayland",
+                    "description": "Sıcak iklim, egzotik kültür, uygun fiyatlar"
+                })
+            if not any("Bali" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Bali, Endonezya",
+                    "description": "Sıcak iklim, doğa, spa ve huzur"
+                })
+        elif "serin" in climate.lower():
             if not any("Banff" in d["name"] for d in destinations):
                 destinations.append({
                     "name": "Banff, Kanada",
@@ -1534,61 +1616,51 @@ def generate_fallback_destinations(answers, ai_questions, existing_destinations)
                     "name": "Queenstown, Yeni Zelanda",
                     "description": "Serin iklim, macera sporları, doğal güzellikler"
                 })
-    
-    # Aktivite tercihine göre öneriler
-    if "doğa" in activity.lower() or "macera" in activity.lower():
-        if "yakın" in distance.lower():
-            if not any("İsviçre" in d["name"] for d in destinations):
-                destinations.append({
-                    "name": "İsviçre Alpleri, İsviçre",
-                    "description": "Doğa sporları, trekking, dağ aktiviteleri"
-                })
-        else:
+        
+        # Aktivite tercihine göre uzak destinasyon önerileri
+        if "doğa" in activity.lower() or "macera" in activity.lower():
             if not any("Yeni Zelanda" in d["name"] for d in destinations):
                 destinations.append({
                     "name": "Queenstown, Yeni Zelanda",
                     "description": "Macera sporları, doğa aktiviteleri, ekstrem sporlar"
                 })
-    
-    elif "tarih" in activity.lower() or "kültür" in activity.lower():
-        if "yakın" in distance.lower():
-            if not any("Roma" in d["name"] for d in destinations):
+            if not any("Peru" in d["name"] for d in destinations):
                 destinations.append({
-                    "name": "Roma, İtalya",
-                    "description": "Tarihi ve kültürel miras, antik uygarlık"
+                    "name": "Machu Picchu, Peru",
+                    "description": "Antik uygarlık, dağ trekking, tarihi keşif"
                 })
-        else:
+        elif "tarih" in activity.lower() or "kültür" in activity.lower():
             if not any("Kyoto" in d["name"] for d in destinations):
                 destinations.append({
                     "name": "Kyoto, Japonya",
                     "description": "Geleneksel kültür, tapınaklar, tarihi atmosfer"
                 })
-    
-    elif "sanat" in activity.lower() or "gastronomi" in activity.lower():
-        if "yakın" in distance.lower():
-            if not any("Paris" in d["name"] for d in destinations):
+            if not any("Mısır" in d["name"] for d in destinations):
                 destinations.append({
-                    "name": "Paris, Fransa",
-                    "description": "Sanat, gastronomi, lüks deneyim"
+                    "name": "Lüksor, Mısır",
+                    "description": "Antik uygarlık, piramitler, Nil nehri"
                 })
-        else:
+        elif "sanat" in activity.lower() or "gastronomi" in activity.lower():
             if not any("Tokyo" in d["name"] for d in destinations):
                 destinations.append({
                     "name": "Tokyo, Japonya",
                     "description": "Modern sanat, geleneksel mutfak, kültür"
                 })
+            if not any("Singapur" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Singapur",
+                    "description": "Modern şehir, kültür karışımı, temizlik"
+                })
     
     # Bütçe tercihine göre öneriler
     if "düşük" in budget.lower():
-        if not any("Türkiye" in d["name"] for d in destinations):
-            destinations.append({
-                "name": "İstanbul, Türkiye",
-                "description": "Ekonomik seyahat, tarih, kültür ve lezzetli mutfak"
-            })
-    
-    # Eğer hala 3'ten azsa, genel öneriler ekle
-    while len(destinations) < 3:
-        if "yakın" in distance.lower():
+        if "türkiye" in distance.lower():
+            if not any("Türkiye" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "İstanbul, Türkiye",
+                    "description": "Ekonomik seyahat, tarih, kültür ve lezzetli mutfak"
+                })
+        elif "avrupa" in distance.lower():
             if not any("Prag" in d["name"] for d in destinations):
                 destinations.append({
                     "name": "Prag, Çek Cumhuriyeti",
@@ -1599,16 +1671,47 @@ def generate_fallback_destinations(answers, ai_questions, existing_destinations)
                     "name": "Budapeşte, Macaristan",
                     "description": "Tarihi şehir, termal banyolar, ekonomik seyahat"
                 })
-        else:
-            if not any("Singapur" in d["name"] for d in destinations):
+        elif "uzak" in distance.lower():
+            if not any("Vietnam" in d["name"] for d in destinations):
                 destinations.append({
-                    "name": "Singapur",
-                    "description": "Modern şehir, kültür karışımı, temizlik"
+                    "name": "Hanoi, Vietnam",
+                    "description": "Ekonomik seyahat, geleneksel kültür, lezzetli mutfak"
                 })
-            elif not any("Melbourne" in d["name"] for d in destinations):
+    
+    # Eğer hala 3'ten azsa, genel öneriler ekle
+    while len(destinations) < 3:
+        if "türkiye" in distance.lower():
+            if not any("Eskişehir" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Eskişehir, Türkiye",
+                    "description": "Üniversite şehri, Porsuk Çayı, modern kültür"
+                })
+            elif not any("Çanakkale" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Çanakkale, Türkiye",
+                    "description": "Tarihi Truva, Gelibolu, deniz manzarası"
+                })
+        elif "avrupa" in distance.lower():
+            if not any("Porto" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Porto, Portekiz",
+                    "description": "Şarap kültürü, tarihi merkez, nehir manzarası"
+                })
+            elif not any("Krakow" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Krakow, Polonya",
+                    "description": "Orta çağ atmosferi, tarihi meydan, uygun fiyatlar"
+                })
+        elif "uzak" in distance.lower():
+            if not any("Melbourne" in d["name"] for d in destinations):
                 destinations.append({
                     "name": "Melbourne, Avustralya",
                     "description": "Kültür şehri, sanat, gastronomi ve doğa"
+                })
+            elif not any("Cape Town" in d["name"] for d in destinations):
+                destinations.append({
+                    "name": "Cape Town, Güney Afrika",
+                    "description": "Dağ ve deniz manzarası, tarih, doğa"
                 })
     
     return destinations[:3]
@@ -1646,7 +1749,7 @@ def generate_recommendation_reasoning(answers, destination):
         {
             "id": "distance",
             "question": "🌍 Kıta veya mesafe tercihiniz nedir?",
-            "options": ["Yakın (Avrupa/Türkiye)", "Uzak (Asya/Amerika)", "Fark etmez"],
+            "options": ["Türkiye içi", "Avrupa (yakın)", "Uzak (Asya/Amerika/Afrika)", "Fark etmez"],
             "category": "distance"
         },
         {
@@ -1708,10 +1811,12 @@ def generate_recommendation_reasoning(answers, destination):
     
     # Mesafe
     distance = ai_questions[4]['options'][answers.get('distance', 0)]
-    if "yakın" in distance.lower():
-        reasoning += "🌍 **Yakın mesafe tercihiniz** - Bu destinasyon Türkiye'ye yakın ve kolay ulaşılabilir.\n"
+    if "türkiye" in distance.lower():
+        reasoning += "🌍 **Türkiye içi seyahat tercihiniz** - Bu destinasyon kendi ülkenizde, çok yakın ve kolay ulaşılabilir.\n"
+    elif "avrupa" in distance.lower():
+        reasoning += "🌍 **Avrupa seyahat tercihiniz** - Bu destinasyon Avrupa'da, Türkiye'ye yakın ve kültürel açıdan zengin.\n"
     elif "uzak" in distance.lower():
-        reasoning += "🌍 **Uzak mesafe tercihiniz** - Bu destinasyon benzersiz ve farklı kültür deneyimi sunar.\n"
+        reasoning += "🌍 **Uzak mesafe seyahat tercihiniz** - Bu destinasyon farklı kıtalarda, benzersiz ve farklı kültür deneyimi sunar.\n"
     
     reasoning += "\nBu destinasyon, belirttiğiniz tüm tercihleri en iyi şekilde karşılayacak ve unutulmaz bir seyahat deneyimi yaşatacaktır."
     
@@ -1738,40 +1843,38 @@ def generate_plan_with_gemini(goal, api_key, days=7, start_day=0):
         json_template += f'''    {{
       "day": "{selected_days[i]}",
       "tasks": [
-        "Spesifik seyahat aktivitesi 1 (sayısal değerlerle)",
-        "Spesifik seyahat aktivitesi 2 (sayısal değerlerle)",
-        "Spesifik seyahat aktivitesi 3 (sayısal değerlerle)"
+        "Spesifik aktivite 1 (sayısal değerlerle)",
+        "Spesifik aktivite 2 (sayısal değerlerle)",
+        "Spesifik aktivite 3 (sayısal değerlerle)"
       ]
     }}{"," if i < days - 1 else ""}\n'''
     
     json_template += '  ]\n}'
     
     prompt = f"""
-Kullanıcının belirttiği seyahat hedefi: "{goal}"
+Kullanıcının belirttiği hedef: "{goal}"
 
-Bu seyahat hedefini detaylı şekilde analiz et ve {days} günlük bir seyahat planı oluştur. Her gün için 3-4 adet ÇOK SPESİFİK, ÖLÇÜLEBİLİR ve YAPILABİLİR aktivite belirle.
-
-ÖNEMLİ: Kullanıcının belirttiği şehir/ülke için plan yap. Başka bir yer için plan yapma!
+Bu hedefi detaylı şekilde analiz et ve {days} günlük bir plan oluştur. Her gün için 3-4 adet ÇOK SPESİFİK, ÖLÇÜLEBİLİR ve YAPILABİLİR aktivite belirle.
 
 Aktiviteler şu kriterlere uygun olmalı:
-- SEYAHAT ODAKLI: Hedefle doğrudan ilgili ve spesifik seyahat aktiviteleri
+- HEDEF ODAKLI: Hedefle doğrudan ilgili ve spesifik aktiviteler
 - ÖLÇÜLEBİLİR: Sayısal değerler içermeli (örn: 2 saat, 1 saat, 30 dakika)
 - GÜNLÜK: O gün tamamlanabilir
-- SPESİFİK: Genel değil, net ve belirli yerler/aktivite isimleri
-- MOTİVASYONEL: Unutulmaz deneyimler sunacak
+- SPESİFİK: Genel değil, net ve belirli aktivite isimleri
+- MOTİVASYONEL: Hedefinize ulaşmanızı sağlayacak
 
 ÖRNEKLER:
-- Viyana kültür turu için: "Stephansdom Katedrali'ni ziyaret edin ve 1.5 saat boyunca gotik mimarisini inceleyin.", "Hofburg Sarayı'nda 2 saat geçirin ve İmparatorluk Apartmanları'nı gezin.", "Naschmarkt'ta 1 saat geçirin ve yerel lezzetleri tadın."
-- Paris sanat turu için: "Louvre Müzesi'ni ziyaret edin ve 3 saat boyunca Mona Lisa ve diğer başyapıtları inceleyin.", "Eiffel Kulesi'ne çıkın ve 1 saat boyunca Paris manzarasını seyredin.", "Montmartre'da 2 saat geçirin ve Sacré-Cœur Bazilikası'nı ziyaret edin."
-- Tokyo gastronomi turu için: "Tsukiji Dış Pazarı'nda 2 saat geçirin ve taze deniz ürünlerini keşfedin.", "Shibuya'da 1 saat geçirin ve meşhur kavşakta fotoğraf çekin.", "Akihabara'da 2 saat geçirin ve elektronik mağazalarını keşfedin."
+- Öğrenme hedefi için: "Matematik konusunu 2 saat çalışın ve 10 problem çözün.", "İngilizce kelime kartları hazırlayın ve 1 saat boyunca tekrar edin.", "Konu özetini 30 dakikada yazın."
+- Fitness hedefi için: "30 dakika koşu yapın ve 5 km mesafe kat edin.", "Ağırlık antrenmanı yapın ve 3 set 12 tekrar.", "Esneme hareketleri yapın ve 15 dakika yoga."
+- İş hedefi için: "Proje planını 2 saat boyunca detaylandırın.", "Ekip toplantısı yapın ve 1 saat süreyle tartışın.", "Raporu 45 dakikada tamamlayın."
 
 Cevabın SADECE aşağıdaki formatta bir JSON objesi olmalıdır:
 {json_template}
 
 ÖNEMLİ: 
 1. Her aktivite sayısal değerler içermeli ve çok spesifik olmalı. Genel aktiviteler verme!
-2. Kullanıcının belirttiği şehir/ülke için plan yap. Başka bir yer için plan yapma!
-3. Seyahat odaklı, yer isimleri ve sürelerle birlikte detaylı aktiviteler oluştur.
+2. Kullanıcının belirttiği hedef için plan yap.
+3. Hedef odaklı, sürelerle birlikte detaylı aktiviteler oluştur.
 4. Tam olarak {days} günlük plan oluştur, fazla veya eksik gün olmasın!
 5. GÜNLERİN SIRASINI DEĞİŞTİRME! Template'deki gün sırasını aynen kullan!
 6. İlk gün: {selected_days[0]}, son gün: {selected_days[-1]} olacak şekilde plan yap!
@@ -1835,3 +1938,32 @@ Lütfen sadece JSON formatında yanıt ver, başka hiçbir açıklama ekleme.
     except Exception as e:
         st.error(f"Beklenmedik bir hata oluştu: {e}")
         return None
+
+def analyze_personality_from_answers(answers, goal):
+    """
+    Kullanıcının cevaplarına göre kişilik analizi yapar ve kişiselleştirilmiş öneriler verir.
+    """
+    if not answers or len(answers) < 3:
+        return {
+            "personality_type": "Çok Yönlü",
+            "description": "Farklı yaklaşımları denemeye açık, esnek bir yaklaşımınız var.",
+            "travel_style": "Esnek ve uyarlanabilir",
+            "strengths": ["Çeşitliliğe açık", "Kolay uyum sağlar", "Yeni deneyimlere meraklı"],
+            "tips": ["Farklı aktivite türlerini deneyin", "Esnek program yapın", "Anlık kararlarla ilerleyin"],
+            "destination_recommendations": []
+        }
+    
+    # Basit kişilik analizi
+    personality_type = "Çok Yönlü"
+    travel_style = "Esnek ve uyarlanabilir"
+    strengths = ["Çeşitliliğe açık", "Kolay uyum sağlar", "Yeni deneyimlere meraklı"]
+    tips = ["Farklı aktivite türlerini deneyin", "Esnek program yapın", "Anlık kararlarla ilerleyin"]
+    
+    return {
+        "personality_type": personality_type,
+        "description": f"Genel hedeflerde {travel_style.lower()} tarzını tercih ediyorsunuz.",
+        "travel_style": travel_style,
+        "strengths": strengths,
+        "tips": tips,
+        "destination_recommendations": []
+    }
