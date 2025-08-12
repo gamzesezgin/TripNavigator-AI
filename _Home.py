@@ -104,7 +104,31 @@ with col4:
     </div>
     """, unsafe_allow_html=True)
 
-# 3. Örnek Hedefler Bölümü
+# 3. Seyahat Planlama Seçenekleri Bölümü
+st.markdown("---")
+st.subheader("🚀 Seyahat Planlama Seçeneklerin")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 15px; text-align: center; color: white; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">🎯 Kendi Hedefini Belirle</h3>
+        <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">Nereye gitmek istediğini biliyorsan, hemen seyahat tarzını keşfet ve kişiselleştirilmiş planını oluştur!</p>
+        <a href="/_New_Plan" class="cta-button" style="text-decoration: none; display: inline-block; margin-top: 1rem;">🎯 Hedefimi Belirle</a>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 2rem; border-radius: 15px; text-align: center; color: white; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">🤖 AI Destinasyon Önerisi</h3>
+        <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">Nereye gideceğini bilmiyorsan, birkaç soruyla sana en uygun destinasyonu önereyim!</p>
+        <a href="/_AI_Recommendation" class="cta-button" style="text-decoration: none; display: inline-block; margin-top: 1rem;">🤖 AI Önerisi Al</a>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 4. Örnek Hedefler Bölümü
 st.markdown("---")
 st.subheader("💡 Örnek Seyahat Hedefleri")
 
@@ -121,3 +145,6 @@ st.markdown("""
     <span class="goal-tag">🎨 Paris'te 3 günlük sanat turu</span>
 </div>
 """, unsafe_allow_html=True)
+
+
+# Kişilik analizi ve özel öneriler bölümü ana sayfadan kaldırıldı - artık My Plans sayfasında her plan için gösteriliyor

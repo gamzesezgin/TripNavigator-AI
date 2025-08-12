@@ -18,7 +18,7 @@ def save_plans(plans):
     with open(PLANS_FILE, 'w', encoding='utf-8') as f:
         json.dump(plans, f, ensure_ascii=False, indent=4)
 
-def create_new_plan(goal, weekly_tasks, learning_style, motivation_message):
+def create_new_plan(goal, weekly_tasks, learning_style, motivation_message, survey_answers=None):
     """
     Yeni bir plan oluşturur
     """
@@ -31,7 +31,8 @@ def create_new_plan(goal, weekly_tasks, learning_style, motivation_message):
         "weekly_tasks": weekly_tasks,
         "current_week": 1,
         "completed_tasks": [],
-        "weekly_progress": []
+        "weekly_progress": [],
+        "survey_answers": survey_answers or []
     }
     return plan
 

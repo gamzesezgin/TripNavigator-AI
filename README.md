@@ -1,71 +1,134 @@
-# <Trip Navigator AI> - Akıllı Seyahat Planlayıcısı
+# 🚀 Planify - Akıllı Seyahat Planlayıcısı
 
-Trip Navigator AI, kullanıcıların seyahat hedeflerini yapay zeka yardımıyla yönetilebilir ve eyleme geçirilebilir günlük aktivitelere dönüştürmelerini sağlayan bir Streamlit uygulamasıdır.
+Yapay Zekâ destekli kişiselleştirilmiş seyahat planlayıcısı. Hedefinizi belirtin, AI size özel seyahat planı oluştursun!
 
 ## ✨ Özellikler
 
-- **Yapay Zeka Destekli Seyahat Planlama:** Doğal dilde girilen seyahat hedefini, Google Gemini modelini kullanarak mantıksal günlük aktivitelere ayırır.
-- **Seyahat Planı Yönetimi:** Oluşturulan seyahat planlarını kaydeder ve aktivite listesi olarak görüntüler.
-- **Aktivite Takibi:** Tamamlanan aktivitelere göre seyahat planının ilerlemesini görsel bir grafikle gösterir.
-- **Haftalık Program:** O hafta tamamlanması gereken aktiviteleri ayrı bir sekmede gösterir.
+- 🎯 **Kişiselleştirilmiş Planlama**: Hedefinize göre özel seyahat planları
+- 🌍 **Çoklu Destinasyon**: İstanbul, Paris, Roma, Tokyo, New York ve daha fazlası
+- 🍽️ **Yemek Önerileri**: Popüler restoranlar ve gastronomi noktaları
+- 🏛️ **Gezilecek Yerler**: Müzeler, tarihi yerler, parklar ve mahalleler
+- 📱 **Streamlit Arayüzü**: Kullanıcı dostu web arayüzü
+- 🔍 **RAG Sistemi**: Yerel veritabanından akıllı öneriler
 
-## 🚀 Kurulum ve Çalıştırma
+## 🛠️ Kurulum
 
-### 1. Projeyi İndirin
+### 1. Projeyi Klonlayın
 
 ```bash
-git clone https://github.com/KULLANICI-ADINIZ/REPO-ADINIZ.git
-cd REPO-ADINIZ
+git clone <repository-url>
+cd Planify
 ```
 
-### 2. Python Sanal Ortamı Oluşturun
+### 2. Sanal Ortam Oluşturun
 
 ```bash
-# Sanal ortam oluşturun
 python -m venv venv
+```
 
-# Sanal ortamı aktif edin
-# Windows için:
+### 3. Sanal Ortamı Aktifleştirin
+
+**Windows:**
+```bash
 venv\Scripts\activate
-# macOS/Linux için:
+```
+
+**macOS/Linux:**
+```bash
 source venv/bin/activate
 ```
 
-### 3. Gerekli Paketleri Yükleyin
+### 4. Gerekli Paketleri Yükleyin
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Google Gemini API Anahtarı Alın
+### 5. Google Gemini API Anahtarı Alın
 
 1. [Google AI Studio](https://makersuite.google.com/app/apikey) adresine gidin
-2. Google hesabınızla giriş yapın
-3. "Create API Key" butonuna tıklayın
-4. Oluşturulan API anahtarını kopyalayın
+2. Yeni API anahtarı oluşturun
+3. Anahtarı kopyalayın
 
-### 5. API Anahtarını Yapılandırın
+### 6. API Anahtarını Yapılandırın
 
 Proje klasörünüzde `.env` dosyası oluşturun:
 
-**Önemli:** `.env` dosyasına  kendi API anahtarınızı girin.
+```
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+```
 
-### 6. Uygulamayı Çalıştırın
+**Önemli:** `.env` dosyasına kendi API anahtarınızı girin.
+
+### 7. Uygulamayı Çalıştırın
 
 ```bash
 streamlit run _Home.py
 ```
 
-## 📁 Proje Yapısı
+## 🌟 Destinasyonlar
 
-```
-Planify/
-├── _Home.py              # Ana uygulama dosyası
-├── data_handler.py       # Veri yönetimi
-├── gemini_handler.py     # Gemini API entegrasyonu
-├── pages/
-│   ├── _My_Plans.py     # Planlarım sayfası
-│   └── _New_Plan.py     # Yeni plan oluşturma
-├── requirements.txt      # Python bağımlılıkları
-└── README.md           # Bu dosya
-```
+Şu anda desteklenen şehirler:
+
+- **🇹🇷 İstanbul**: Ayasofya, Topkapı Sarayı, Kapalı Çarşı
+- **🇫🇷 Paris**: Louvre, Eiffel Kulesi, Montmartre
+- **🇮🇹 Roma**: Colosseum, Vatikan Müzeleri, Trevi Çeşmesi
+- **🇯🇵 Tokyo**: Senso-ji Tapınağı, Shibuya, Tsukiji Pazarı
+- **🇺🇸 New York**: Times Square, Central Park, Empire State
+
+## 📱 Kullanım
+
+### Ana Sayfa
+- Destinasyonları keşfedin
+- Mevcut şehirlerin özelliklerini görün
+
+### Yeni Plan Oluştur
+1. Seyahat hedefinizi yazın (örn: "İstanbul'da 3 günlük kültür turu")
+2. Seyahat tarzınızı belirleyin
+3. AI size özel plan oluştursun
+
+### Mevcut Planlarım
+- Daha önce oluşturduğunuz planları görüntüleyin
+- Planları düzenleyin ve güncelleyin
+
+## 🔧 Teknik Detaylar
+
+### Mimari
+- **Frontend**: Streamlit
+- **AI Planlama**: Google Gemini API
+- **Öneriler**: RAG (Retrieval-Augmented Generation) sistemi
+- **Veri**: Yerel JSONL corpus
+
+### RAG Sistemi
+- Yerel veritabanından akıllı arama
+- Şehir bazlı filtreleme
+- Kategori bazlı öneriler
+- Anahtar kelime eşleştirme
+
+## 🚀 Gelecek Özellikler
+
+- [ ] Daha fazla şehir ekleme
+- [ ] Görsel harita entegrasyonu
+- [ ] Sosyal medya entegrasyonu
+- [ ] Çoklu dil desteği
+- [ ] Mobil uygulama
+
+## 🤝 Katkıda Bulunma
+
+1. Fork yapın
+2. Feature branch oluşturun (`git checkout -b feature/AmazingFeature`)
+3. Commit yapın (`git commit -m 'Add some AmazingFeature'`)
+4. Push yapın (`git push origin feature/AmazingFeature`)
+5. Pull Request oluşturun
+
+## 📄 Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır.
+
+## 📞 İletişim
+
+Sorularınız için issue açın veya [email] adresine yazın.
+
+---
+
+**Not:** Bu proje eğitim amaçlı geliştirilmiştir. Ticari kullanım için lütfen gerekli izinleri alın.

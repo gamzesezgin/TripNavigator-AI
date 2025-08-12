@@ -10,13 +10,13 @@ load_dotenv()
 
 st.set_page_config(layout="wide")
 st.title("✈️ Yeni Bir Seyahat Planı Oluştur")
-st.markdown("Seyahat tarzını keşfet, kişiselleştirilmiş günlük aktiviteler al!")
+st.markdown("Hedefini belirt, seyahat tarzını keşfet, kişiselleştirilmiş günlük aktiviteler al!")
 
 # Sayfa yüklendiğinde session state kontrolü
 # Eğer önceki bir plan oluşturma işlemi tamamlanmışsa, session state'i sıfırla
 if st.session_state.get('plan_created', False):
     # Plan oluşturuldu, session state'i temizle
-    for key in ['step', 'learning_style_answers', 'user_goal', 'plan_days', 'start_day', 'plan_created']:
+    for key in ['step', 'learning_style_answers', 'user_goal', 'plan_days', 'start_day', 'travel_style', 'plan_created']:
         if key in st.session_state:
             del st.session_state[key]
     st.rerun()
@@ -32,16 +32,36 @@ if 'plan_days' not in st.session_state:
     st.session_state.plan_days = 7
 if 'start_day' not in st.session_state:
     st.session_state.start_day = 0  # 0=Pazartesi, 1=Salı, 2=Çarşamba, ...
+if 'travel_style' not in st.session_state:
+    st.session_state.travel_style = "Doğa ve macera"
 
 # Adım 1: Hedef belirleme
 if st.session_state.step == 1:
-    st.subheader("🎯Seyahat Hedefini ve Süreni Belirt")
+    st.subheader("🎯 Adım 1: Seyahat Hedefini ve Tarzını Belirt")
     
     user_goal = st.text_area(
-        "Lokasyon: ",
+        "Planlamak istediğiniz seyahati buraya yazın:",
         height=100,
-        placeholder="Örn: 'Roma'",
+        placeholder="Örn: 'Roma'da 3 günlük kültür turu yapmak istiyorum' veya 'Paris'te 5 günlük sanat turu planlamak istiyorum'",
         value=st.session_state.user_goal
+    )
+    
+    st.markdown("---")
+    
+    st.subheader("🎨 Seyahat Tarzı")
+    st.markdown("Hangi tarz bir gezi istiyorsunuz?")
+    
+    travel_style = st.selectbox(
+        "Seyahat tarzınız:",
+        options=[
+            "Doğa ve macera",
+            "Tarih ve kültür", 
+            "Sanat ve gastronomi",
+            "Alışveriş ve eğlence",
+            "Tatil ve dinlenme",
+            "Karışık (hepsinden biraz)"
+        ],
+        index=["Doğa ve macera", "Tarih ve kültür", "Sanat ve gastronomi", "Alışveriş ve eğlence", "Tatil ve dinlenme", "Karışık (hepsinden biraz)"].index(st.session_state.travel_style)
     )
     
     st.markdown("---")
@@ -84,6 +104,7 @@ if st.session_state.step == 1:
             st.session_state.user_goal = user_goal
             st.session_state.plan_days = plan_days
             st.session_state.start_day = day_names.index(start_day)
+            st.session_state.travel_style = travel_style
             st.session_state.step = 2
             st.rerun()
         else:
@@ -94,7 +115,7 @@ elif st.session_state.step == 2:
     st.subheader("🎯 Adım 2: Size Özel Seyahat Planı Oluşturma")
     st.markdown("Size en uygun aktiviteleri oluşturmak için birkaç soru soralım.")
     
-    questions = generate_goal_specific_questions(st.session_state.user_goal)
+    questions = generate_goal_specific_questions(st.session_state.user_goal, st.session_state.travel_style)
     
     if len(st.session_state.learning_style_answers) < len(questions):
         current_question_index = len(st.session_state.learning_style_answers)
@@ -125,6 +146,31 @@ elif st.session_state.step == 2:
     
     else:
         st.success("✅ Analiz tamamlandı!")
+        
+        # Kişilik analizi sonuçlarını göster
+        st.subheader("🔍 Kişilik Analizi Sonuçlarınız")
+        
+        # Analiz sonuçlarını analiz et
+        from gemini_handler import analyze_personality_from_answers
+        
+        personality_analysis = analyze_personality_from_answers(
+            st.session_state.learning_style_answers, 
+            st.session_state.user_goal
+        )
+        
+        # Kişilik profili
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.markdown("**🎭 Seyahat Kişiliğiniz:**")
+            st.info(f"**{personality_analysis['personality_type']}**")
+            st.write(personality_analysis['description'])
+            
+            st.markdown("**💡 Seyahat Tarzınız:**")
+            st.success(personality_analysis['travel_style'])
+        
+        
+        st.markdown("---")
         
         if st.button("🎯 Kişiselleştirilmiş Seyahat Planımı Oluştur!", type="primary"):
             st.session_state.step = 3
@@ -164,7 +210,8 @@ elif st.session_state.step == 3:
             goal=st.session_state.user_goal,
             weekly_tasks=weekly_tasks,
             learning_style="Kişiselleştirilmiş",
-            motivation_message=motivation_message
+            motivation_message=motivation_message,
+            survey_answers=st.session_state.get('learning_style_answers', [])
         )
         
         # Planı kaydet
@@ -181,8 +228,8 @@ elif st.session_state.step == 3:
         # Yeni plan oluştur butonu
         if st.button("🆕 Yeni Seyahat Planı Oluştur", key="new_plan_button"):
             # Session state'i tamamen temizle
-            for key in ['step', 'learning_style_answers', 'user_goal', 'plan_days', 'start_day', 'plan_created']:
+            for key in ['step', 'learning_style_answers', 'user_goal', 'plan_days', 'start_day', 'travel_style', 'plan_created']:
                 if key in st.session_state:
                     del st.session_state[key]
             st.rerun()
-
+            

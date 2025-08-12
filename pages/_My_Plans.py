@@ -1,7 +1,9 @@
 import streamlit as st
-import plotly.graph_objects as go
-from data_handler import load_plans, save_plans, get_current_week_tasks, mark_task_completed, unmark_task_completed, get_weekly_stats
+from data_handler import load_plans, save_plans, get_current_week_tasks, mark_task_completed, unmark_task_completed
 from datetime import datetime
+from agents.recommender_agent import recommend_pois
+# from agents.hf_food_agent import get_popular_food_places  # Artık kullanılmıyor
+from agents.hf_places_agent import get_popular_attractions
 
 st.set_page_config(layout="wide")
 st.title("✈️ Seyahat Planlarım ve Aktivite Takibi")
@@ -64,77 +66,203 @@ else:
                     st.write("Bu seyahat planı için aktivite bulunmuyor.")
             
             with col2:
-                st.subheader("📊 Seyahat İlerlemesi")
-                
-                # Haftalık istatistikleri hesapla
-                stats = get_weekly_stats(plan)
-                
-                if stats['total_tasks'] > 0:
-                    # İlerleme göstergesi
-                    fig = go.Figure(go.Indicator(
-                        mode = "gauge+number+delta",
-                        value = stats['progress_percentage'],
-                        title = {'text': f"{stats['completed_tasks']} / {stats['total_tasks']} Aktivite"},
-                        delta = {'reference': 0},
-                        gauge = {
-                            'axis': {'range': [None, 100]},
-                            'bar': {'color': "#28a745"},
-                            'steps': [
-                                {'range': [0, 50], 'color': "lightgray"},
-                                {'range': [50, 80], 'color': "yellow"},
-                                {'range': [80, 100], 'color': "lightgreen"}
-                            ],
-                            'threshold': {
-                                'line': {'color': "red", 'width': 4},
-                                'thickness': 0.75,
-                                'value': 90
-                            }
-                        }
-                    ))
-                    fig.update_layout(height=250, margin=dict(l=10, r=10, t=50, b=10))
-                    st.plotly_chart(fig, use_container_width=True, key=f"chart_{plan['id']}")
-                    
-                    # Başarı mesajı - Seyahat odaklı
-                    if stats['progress_percentage'] >= 90:
-                        st.success("🏆 Mükemmel! Seyahatinizin neredeyse tamamını tamamladınız!")
-                    elif stats['progress_percentage'] >= 75:
-                        st.success("🎉 Harika! Seyahatinizin büyük kısmını tamamladınız!")
-                    elif stats['progress_percentage'] >= 60:
-                        st.info("👍 Çok iyi gidiyorsunuz! Seyahatinizin yarısından fazlasını tamamladınız!")
-                    elif stats['progress_percentage'] >= 40:
-                        st.info("💪 İyi başlangıç! Seyahatinizin önemli bir kısmını tamamladınız!")
-                    elif stats['progress_percentage'] >= 25:
-                        st.info("🌟 Seyahate başladınız! Her aktivite unutulmaz anılar katıyor!")
-                    elif stats['progress_percentage'] >= 10:
-                        st.info("🚀 Seyahat yolculuğuna başladınız! Her aktivite size yaklaştırıyor!")
+                st.subheader("🌟 Önerilen Mekanlar")
+
+                tabs = st.tabs(["Gezilecek Yerler (HF)", "Yemek (HF)"])
+
+                with tabs[0]:
+                    st.caption("Hugging Face (Gemma 2 2B IT) ile popüler gezi noktaları")
+                    city_or_goal = plan.get('goal', '')
+                    with st.spinner("Gezilecek yerler alınıyor..."):
+                        try:
+                            places = get_popular_attractions(city_or_goal, top_k=8)
+                        except Exception:
+                            places = []
+
+                    if places:
+                        cols = st.columns(2)
+                        for i, p in enumerate(places):
+                            with cols[i % 2]:
+                                st.markdown(
+                                    f"""
+                                    <div style=\"border:1px solid #eee; border-radius:10px; padding:12px; margin-bottom:12px;\">
+                                        <div style=\"font-weight:600; font-size:1rem;\">{p.get('name','')}</div>
+                                        <div style=\"font-size:0.9rem; color:#666; margin-top:2px;\">
+                                            {p.get('kind','').title()} {('• ' + p.get('city','')) if p.get('city') else ''} {('• ' + p.get('neighborhood','')) if p.get('neighborhood') else ''}
+                                        </div>
+                                        <div style=\"margin-top:8px;\">{p.get('short_reason','')}</div>
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True,
+                                )
                     else:
-                        st.info("💫 Seyahat yeni başladı! İlk aktiviteleri deneyimlemeye hazırsınız!")
-                else:
-                    st.write("Aktivite bulunmuyor.")
+                        st.info("Gezi önerisi bulunamadı. Hedefi şehir/ülke adı içerecek şekilde yazmayı deneyin.")
+
+                with tabs[1]:
+                    st.caption("🔍 Gerçek Zamanlı Yemek Önerileri (OpenTripMap API)")
+                    
+                    # Yemek arama formu
+                    col1, col2, col3 = st.columns([2, 2, 1])
+                    
+                    with col1:
+                        cuisine = st.selectbox(
+                            "🍽️ Mutfak Türü",
+                            options=[
+                                "genel",
+                                "balık ekmek",
+                                "kebap",
+                                "lahmacun",
+                                "kahve",
+                                "çay",
+                                "tatlı",
+                                "dondurma",
+                                "pizza",
+                                "sushi",
+                                "burger",
+                                "çorba"
+                            ],
+                            help="Hangi tür yemek arıyorsunuz?",
+                            key=f"cuisine_{plan['id']}"
+                        )
+                    
+                    with col2:
+                        search_button = st.button("🔍 Ara", type="primary", use_container_width=True, key=f"search_{plan['id']}")
+                    
+                    with col3:
+                        st.write("")  # Boşluk için
+                    
+                    # Arama sonuçları
+                    if search_button:
+                        st.markdown("---")
+                        st.subheader(f"🍽️ {plan.get('goal', '')} - {cuisine.title()} Önerileri")
+                        
+                        try:
+                            from agents.food_recommender import get_food_recommendations
+                            
+                            with st.spinner("🍽️ Yemek mekanları aranıyor..."):
+                                food_places = get_food_recommendations(plan.get('goal', ''), cuisine, 6)
+                            
+                            if food_places:
+                                st.success(f"✅ {len(food_places)} yemek mekanı bulundu!")
+                                
+                                # Sonuçları göster
+                                cols = st.columns(2)
+                                for i, place in enumerate(food_places):
+                                    with cols[i % 2]:
+                                        # Rating yıldızları
+                                        rating = place.get('rating', 0)
+                                        stars = "⭐" * int(rating) if rating > 0 else "⭐"
+                                        
+                                        # Fiyat seviyesi
+                                        price_level = place.get('price_level', '')
+                                        price_display = "💰" * len(price_level) if price_level else "💰"
+                                        
+                                        st.markdown(f"""
+                                        <div style="background: #fff; border: 2px solid #e0e0e0; border-radius: 15px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                                <h4 style="color: #1976d2; margin: 0; font-size: 1.1rem;">{place.get('name', 'İsimsiz')}</h4>
+                                                <div style="text-align: right;">
+                                                    <div style="color: #ff9800; font-size: 0.9rem;">{stars} {rating:.1f}</div>
+                                                    <div style="color: #4caf50; font-size: 0.8rem;">{price_display}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                                📍 {place.get('neighborhood', '')} {place.get('city', '')}
+                                            </div>
+                                            
+                                            <div style="color: #424242; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                                🏷️ {place.get('category', '')} • {place.get('cuisine', '')}
+                                            </div>
+                                            
+                                            {f'<div style="color: #666; font-size: 0.8rem; margin-bottom: 0.5rem;">📝 {place.get("description", "")[:100]}...</div>' if place.get('description') else ''}
+                                            
+                                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                                {f'<a href="{place.get("website", "")}" target="_blank" style="background: #2196f3; color: white; padding: 0.3rem 0.6rem; border-radius: 15px; text-decoration: none; font-size: 0.8rem;">🌐 Site</a>' if place.get('website') else ''}
+                                                {f'<span style="background: #4caf50; color: white; padding: 0.3rem 0.6rem; border-radius: 15px; font-size: 0.8rem;">📞 {place.get("phone", "")}</span>' if place.get('phone') else ''}
+                                            </div>
+                                        </div>
+                                        """, unsafe_allow_html=True)
+                            else:
+                                st.warning("❌ Bu konumda yemek mekanı bulunamadı. Farklı bir mutfak türü deneyin.")
+                                
+                        except ImportError:
+                            st.error("❌ Yemek önerisi sistemi yüklenemedi. Lütfen daha sonra tekrar deneyin.")
+                        except Exception as e:
+                            st.error(f"❌ Arama sırasında hata oluştu: {str(e)}")
+                    
+                    # Örnek aramalar
+                    elif not search_button:
+                        st.markdown("""
+                        <div style="background: #f0f8ff; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                            <h4 style="color: #1976d2; margin-bottom: 1rem;">💡 Örnek Aramalar:</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div style="background: white; padding: 1rem; border-radius: 8px; border-left: 4px solid #ff9800;">
+                                    <strong>🍽️ balık ekmek</strong><br>
+                                    <small>📍 Eminönü, Balat</small>
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 8px; border-left: 4px solid #4caf50;">
+                                    <strong>🍽️ kahve</strong><br>
+                                    <small>📍 Viyana, Balat</small>
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 8px; border-left: 4px solid #9c27b0;">
+                                    <strong>🍽️ kebap</strong><br>
+                                    <small>📍 Sultanahmet</small>
+                                </div>
+                                <div style="background: white; padding: 1rem; border-radius: 8px; border-left: 4px solid #f44336;">
+                                    <strong>🍽️ lahmacun</strong><br>
+                                    <small>📍 Herhangi bir şehir</small>
+                                </div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
             
             with col3:
                 st.subheader("ℹ️ Seyahat Bilgileri")
                 
-                # Seyahat tarzı
-                if plan.get('learning_style'):
-                    st.write(f"**Seyahat Tarzı:**")
-                    st.info(plan['learning_style'])
-                
-                # Motivasyon mesajı
-                if plan.get('motivation_message'):
-                    st.write(f"**💪 Motivasyon:**")
-                    st.success(plan['motivation_message'])
-                
-                # Oluşturulma tarihi
-                if plan.get('created_date'):
-                    created_date = datetime.fromisoformat(plan['created_date'])
-                    st.write(f"**📅 Oluşturulma:** {created_date.strftime('%d.%m.%Y')}")
-                
-                # Hafta bilgisi
-                st.write(f"**📊 Gün:** {plan.get('current_week', 1)}")
-            
+                # Kişilik analizi sonuçları
+                if plan.get('survey_answers') and len(plan['survey_answers']) >= 3:
+                    st.markdown("---")
+                    st.markdown("**🔍 Kişilik Analizi Sonuçlarınız:**")
+                    
+                    try:
+                        from gemini_handler import analyze_personality_from_answers
+                        
+                        personality_analysis = analyze_personality_from_answers(
+                            plan['survey_answers'], 
+                            plan['goal']
+                        )
+                        
+                        # Sadece kişilik tipini göster (örn: "Kültür Avcısı")
+                        st.markdown(f"""
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem; border-radius: 10px; color: white; text-align: center;">
+                            <h4 style="margin: 0;">🎭 {personality_analysis['personality_type']}</h4>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Detaylı bilgiler için expander
+                        with st.expander("📋 Detaylı Kişilik Analizi", expanded=False):
+                            st.write(f"**💡 Seyahat Tarzınız:** {personality_analysis['travel_style']}")
+                            
+                            
+                        # Hedef bazında özel öneriler
+                        recommendations = personality_analysis.get('destination_recommendations', [])
+                        if recommendations:
+                            st.markdown("---")
+                            st.markdown("**🎯 Bu Seyahat için Özel Önerileriniz:**")
+                            
+                            for rec in recommendations:
+                                st.markdown(f"""
+                                <div style="background: #fff3e0; padding: 1rem; border-radius: 10px; border: 1px solid #ff9800; margin: 0.5rem 0;">
+                                    <h5 style="color: #e65100; margin-bottom: 0.5rem;">{rec['title']}</h5>
+                                    <p style="font-size: 0.9rem; color: #424242; margin-bottom: 0.5rem;">{rec['description']}</p>
+                                    <small style="color: #666; font-style: italic;">💡 {rec['why_suitable']}</small>
+                                </div>
+                                """, unsafe_allow_html=True)
+                            
+                    except Exception as e:
+                        st.write("Kişilik analizi bilgileri yüklenemedi.")
 
-            
             # Silme butonu
             if st.session_state.confirming_delete == plan['id']:
                 st.warning("Bu seyahat planı kalıcı olarak silinecektir. Emin misiniz?")
