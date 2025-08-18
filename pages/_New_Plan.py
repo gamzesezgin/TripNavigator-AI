@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import uuid
 from dotenv import load_dotenv
-from gemini_handler import generate_goal_specific_questions, generate_plan_with_gemini
+from gemini_handlers import generate_goal_specific_questions, generate_plan_with_gemini, generate_fallback_plan
 from data_handler import load_plans, save_plans, create_new_plan
 
 # .env dosyasındaki değişkenleri yükle
@@ -42,7 +42,7 @@ if st.session_state.step == 1:
     user_goal = st.text_area(
         "Planlamak istediğiniz seyahati buraya yazın:",
         height=100,
-        placeholder="Örn: 'Roma'da 3 günlük kültür turu yapmak istiyorum' veya 'Paris'te 5 günlük sanat turu planlamak istiyorum'",
+        placeholder="Örn: 'Roma'",
         value=st.session_state.user_goal
     )
     
@@ -151,7 +151,7 @@ elif st.session_state.step == 2:
         st.subheader("🔍 Kişilik Analizi Sonuçlarınız")
         
         # Analiz sonuçlarını analiz et
-        from gemini_handler import analyze_personality_from_answers
+        from gemini_handlers import analyze_personality_from_answers
         
         personality_analysis = analyze_personality_from_answers(
             st.session_state.learning_style_answers, 
@@ -184,26 +184,50 @@ elif st.session_state.step == 3:
         # API'den plan al
         api_key = os.getenv('GEMINI_API_KEY')
         
-        if api_key:
-            try:
-                api_plan = generate_plan_with_gemini(st.session_state.user_goal, api_key, st.session_state.plan_days, st.session_state.start_day)
-                
-                if api_plan and 'weekly_tasks' in api_plan:
-                    # API'den gelen planı kullan
-                    weekly_tasks = api_plan['weekly_tasks']
-                    motivation_message = f"'{st.session_state.user_goal}' seyahatinizde her gün unutulmaz anılar biriktirin!"
-                else:
-                    # API başarısız olursa hata ver
-                    st.error("❌ AI servisi şu anda yanıt veremiyor. Lütfen daha sonra tekrar deneyin.")
-                    st.stop()
-            except Exception as e:
-                # API hatası durumunda hata ver
-                st.error("❌ AI servisi zaman aşımına uğradı. Lütfen daha sonra tekrar deneyin.")
-                st.stop()
-        else:
-            # API key yoksa hata ver
-            st.error("❌ API anahtarı bulunamadı. Lütfen sistem yöneticisi ile iletişime geçin.")
-            st.stop()
+        try:
+            # Seyahat tarzını al
+            travel_style = st.session_state.get('travel_style', 'Genel')
+            
+            # API'den plan al
+            api_plan = generate_plan_with_gemini(st.session_state.user_goal, travel_style, st.session_state.plan_days)
+            
+            if api_plan and 'days' in api_plan:
+                # API'den gelen planı kullan
+                weekly_tasks = []
+                for day_data in api_plan['days']:
+                    day_name = day_data['day']
+                    activities = day_data['activities']
+                    weekly_tasks.append({
+                        'day': day_name,
+                        'tasks': activities
+                    })
+                motivation_message = f"'{st.session_state.user_goal}' seyahatinizde her gün unutulmaz anılar biriktirin!"
+            else:
+                # API başarısız olursa fallback plan kullan
+                st.warning("⚠️ AI servisi şu anda yanıt veremiyor. Varsayılan plan oluşturuluyor...")
+                fallback_plan = generate_fallback_plan(st.session_state.user_goal, travel_style, st.session_state.plan_days)
+                weekly_tasks = []
+                for day_data in fallback_plan['days']:
+                    day_name = day_data['day']
+                    activities = day_data['activities']
+                    weekly_tasks.append({
+                        'day': day_name,
+                        'tasks': activities
+                    })
+                motivation_message = f"'{st.session_state.user_goal}' seyahatinizde her gün unutulmaz anılar biriktirin!"
+        except Exception as e:
+            # API hatası durumunda fallback plan kullan
+            st.warning("⚠️ AI servisi zaman aşımına uğradı. Varsayılan plan oluşturuluyor...")
+            fallback_plan = generate_fallback_plan(st.session_state.user_goal, travel_style, st.session_state.plan_days)
+            weekly_tasks = []
+            for day_data in fallback_plan['days']:
+                day_name = day_data['day']
+                activities = day_data['activities']
+                weekly_tasks.append({
+                    'day': day_name,
+                    'tasks': activities
+                })
+            motivation_message = f"'{st.session_state.user_goal}' seyahatinizde her gün unutulmaz anılar biriktirin!"
         
         # Planı oluştur
         new_plan = create_new_plan(

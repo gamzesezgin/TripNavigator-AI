@@ -50,15 +50,27 @@ pip install -r requirements.txt
 2. Yeni API anahtarı oluşturun
 3. Anahtarı kopyalayın
 
-### 6. API Anahtarını Yapılandırın
+### 6. API Anahtarlarını Yapılandırın
 
 Proje klasörünüzde `.env` dosyası oluşturun:
 
 ```
 GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+RAPID_API_KEY=YOUR_RAPID_API_KEY
 ```
 
-**Önemli:** `.env` dosyasına kendi API anahtarınızı girin.
+**Önemli:** `.env` dosyasına kendi API anahtarlarınızı girin.
+
+#### Google Gemini API Anahtarı:
+1. [Google AI Studio](https://makersuite.google.com/app/apikey) adresine gidin
+2. Yeni API anahtarı oluşturun
+3. Anahtarı kopyalayın
+
+#### Rapid API Anahtarı:
+1. [RapidAPI.com](https://rapidapi.com) adresine gidin
+2. Ücretsiz hesap oluşturun
+3. İstediğiniz API'yi seçin (Hotels.com, TripAdvisor, vb.)
+4. API anahtarınızı kopyalayın
 
 ### 7. Uygulamayı Çalıştırın
 
