@@ -20,10 +20,10 @@ else:
         st.markdown("---")
         
         # Plan başlığı ve bilgileri
-        with st.expander(f"✈️ **Seyahat:** {plan['goal']}", expanded=True):
+        with st.expander(f"✈️ **Seyahat:** {plan['goal']}", expanded=False):
             
             # Plan bilgileri
-            col1, col2, col3 = st.columns([2, 1, 1])
+            col1, col2= st.columns([2, 2])
             
             with col1:
                 st.subheader("🗺️ Tüm Günlük Aktiviteler")
@@ -66,13 +66,13 @@ else:
             with col2:
                 st.subheader("🌟 Önerilen Mekanlar")
 
-                st.info("Mekan önerileri için Gemini AI kullanılıyor.")
+                st.info("Mekan önerileri için TripAdvisor API kullanılıyor.")
 
                 # Tabs oluştur
                 tabs = st.tabs(["🗺️ Gezi Noktaları", "🍽️ Yemek Önerileri"])
 
                 with tabs[0]:
-                    st.caption("Gemini AI ile popüler gezi noktaları")
+                    st.caption("TripAdvisor'dan popüler gezi noktaları")
                     city_or_goal = plan.get('goal', '')
                     with st.spinner("Gezilecek yerler alınıyor..."):
                         try:
@@ -81,17 +81,25 @@ else:
                             places = []
 
                     if places:
-                        cols = st.columns(2)
                         for i, p in enumerate(places):
-                            with cols[i % 2]:
+                                # Rating yıldızları
+                                rating = p.get('rating', 0)
+                                stars = "⭐" * int(rating) if rating > 0 else "⭐"
+                                
+                                # TripAdvisor linki
+                                tripadvisor_link = f"<a href='{p.get('tripadvisor_url', '')}' target='_blank' style='color: #00AA6C; text-decoration: none;'>🔗 TripAdvisor</a>" if p.get('tripadvisor_url') else ""
+                                
                                 st.markdown(
                                     f"""
-                                    <div style=\"border:1px solid #eee; border-radius:10px; padding:12px; margin-bottom:12px;\">
-                                        <div style=\"font-weight:600; font-size:1rem;\">{p.get('name','')}</div>
-                                        <div style=\"font-size:0.9rem; color:#666; margin-top:2px;\">
+                                    <div style="border:1px solid #eee; border-radius:10px; padding:12px; margin-bottom:12px;">
+                                        <div style="font-weight:600; font-size:1.2rem; margin-bottom:8px;">{p.get('name','')}</div>
+                                        <div style="font-size:1rem; color:#666; margin-bottom:6px;">
                                             {p.get('kind','').title()} {('• ' + p.get('city','')) if p.get('city') else ''} {('• ' + p.get('neighborhood','')) if p.get('neighborhood') else ''}
                                         </div>
-                                        <div style=\"margin-top:8px;\">{p.get('short_reason','')}</div>
+                                        <div style="margin-bottom:8px; color: #FF9800; font-size:1rem;">{stars} {rating:.1f}/5 ({p.get('review_count', 0)} yorum)</div>
+                                        <div style="margin-bottom:8px; font-size:1rem;">{p.get('short_reason','')}</div>
+                                        <div style="margin-bottom:8px; font-size:0.9rem; color:#666;">{p.get('description','')[:150]}...</div>
+                                        <div style="margin-top:12px;">{tripadvisor_link}</div>
                                     </div>
                                     """,
                                     unsafe_allow_html=True,
@@ -100,97 +108,60 @@ else:
                         st.info("Gezi önerisi bulunamadı. Hedefi şehir/ülke adı içerecek şekilde yazmayı deneyin.")
 
                 with tabs[1]:
-                    st.caption("🔍 Gerçek Zamanlı Yemek Önerileri (OpenTripMap API)")
+                    st.caption("🍽️ TripAdvisor'dan popüler yemek mekanları")
                     
-                    # Yemek arama formu
-                    col1, col2, col3 = st.columns([2, 2, 1])
-                    
-                    with col1:
-                        cuisine = st.selectbox(
-                            "🍽️ Mutfak Türü",
-                            options=[
-                                "genel",
-                                "balık ekmek",
-                                "kebap",
-                                "lahmacun",
-                                "kahve",
-                                "çay",
-                                "tatlı",
-                                "dondurma",
-                                "pizza",
-                                "sushi",
-                                "burger",
-                                "çorba"
-                            ],
-                            help="Hangi tür yemek arıyorsunuz?",
-                            key=f"cuisine_{plan['id']}"
-                        )
-                    
-                    with col2:
-                        search_button = st.button("🔍 Ara", type="primary", use_container_width=True, key=f"search_{plan['id']}")
-                    
-                    with col3:
-                        st.write("")  # Boşluk için
-                    
-                    # Arama sonuçları
-                    if search_button:
-                        st.markdown("---")
-                        st.subheader(f"🍽️ {plan.get('goal', '')} - {cuisine.title()} Önerileri")
-                        
+                    # Direkt yemek önerilerini göster
+                    city_or_goal = plan.get('goal', '')
+                    with st.spinner("Yemek mekanları alınıyor..."):
                         try:
-                            from agents.food_recommender import get_food_recommendations
-                            
-                            with st.spinner("🍽️ Yemek mekanları aranıyor..."):
-                                food_places = get_food_recommendations(plan.get('goal', ''), cuisine, 6)
-                            
-                            if food_places:
-                                st.success(f"✅ {len(food_places)} yemek mekanı bulundu!")
+                            from agents.recommender_agent import get_food_recommendations
+                            food_places = get_food_recommendations(city_or_goal, "genel", 6)
+                        except Exception:
+                            food_places = []
+
+                    if food_places:
+                        st.success(f"✅ {len(food_places)} popüler yemek mekanı bulundu!")
+                        
+                        # Sonuçları göster
+                        for i, place in enumerate(food_places):
+                                # Rating yıldızları
+                                rating = place.get('rating', 0)
+                                stars = "⭐" * int(rating) if rating > 0 else "⭐"
                                 
-                                # Sonuçları göster
-                                cols = st.columns(2)
-                                for i, place in enumerate(food_places):
-                                    with cols[i % 2]:
-                                        # Rating yıldızları
-                                        rating = place.get('rating', 0)
-                                        stars = "⭐" * int(rating) if rating > 0 else "⭐"
-                                        
-                                        # Fiyat seviyesi
-                                        price_level = place.get('price_level', '')
-                                        price_display = "💰" * len(price_level) if price_level else "💰"
-                                        
-                                        st.markdown(f"""
-                                        <div style="background: #fff; border: 2px solid #e0e0e0; border-radius: 15px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                                <h4 style="color: #1976d2; margin: 0; font-size: 1.1rem;">{place.get('name', 'İsimsiz')}</h4>
-                                                <div style="text-align: right;">
-                                                    <div style="color: #ff9800; font-size: 0.9rem;">{stars} {rating:.1f}</div>
-                                                    <div style="color: #4caf50; font-size: 0.8rem;">{price_display}</div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                                📍 {place.get('neighborhood', '')} {place.get('city', '')}
-                                            </div>
-                                            
-                                            <div style="color: #424242; font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                                🏷️ {place.get('category', '')} • {place.get('cuisine', '')}
-                                            </div>
-                                            
-                                            {f'<div style="color: #666; font-size: 0.8rem; margin-bottom: 0.5rem;">📝 {place.get("description", "")[:100]}...</div>' if place.get('description') else ''}
-                                            
-                                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                                                {f'<a href="{place.get("website", "")}" target="_blank" style="background: #2196f3; color: white; padding: 0.3rem 0.6rem; border-radius: 15px; text-decoration: none; font-size: 0.8rem;">🌐 Site</a>' if place.get('website') else ''}
-                                                {f'<span style="background: #4caf50; color: white; padding: 0.3rem 0.6rem; border-radius: 15px; font-size: 0.8rem;">📞 {place.get("phone", "")}</span>' if place.get('phone') else ''}
-                                            </div>
+                                # TripAdvisor linki
+                                tripadvisor_link = f"<a href='{place.get('tripadvisor_url', '')}' target='_blank' style='color: #00AA6C; text-decoration: none;'>🔗 TripAdvisor</a>" if place.get('tripadvisor_url') else ""
+                                
+                                st.markdown(f"""
+                                <div style="background: #fff; border: 2px solid #e0e0e0; border-radius: 15px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                                        <h4 style="color: #1976d2; margin: 0; font-size: 1.3rem;">{place.get('name', 'İsimsiz')}</h4>
+                                        <div style="text-align: right;">
+                                            <div style="color: #ff9800; font-size: 1.1rem;">{stars} {rating:.1f}/5</div>
+                                            <div style="color: #4caf50; font-size: 1rem;">{place.get('price_level', '💰')}</div>
                                         </div>
-                                        """, unsafe_allow_html=True)
-                            else:
-                                st.warning("❌ Bu konumda yemek mekanı bulunamadı. Farklı bir mutfak türü deneyin.")
-                                
-                        except ImportError:
-                            st.error("❌ Yemek önerisi sistemi yüklenemedi. Lütfen daha sonra tekrar deneyin.")
-                        except Exception as e:
-                            st.error(f"❌ Arama sırasında hata oluştu: {str(e)}")
+                                    </div>
+                                    
+                                    <div style="color: #666; font-size: 1rem; margin-bottom: 0.8rem;">
+                                        📍 {place.get('neighborhood', '')} {place.get('city', '')}
+                                    </div>
+                                    
+                                    <div style="color: #424242; font-size: 1rem; margin-bottom: 0.8rem;">
+                                        🏷️ {place.get('category', '')} • {place.get('cuisine', '')}
+                                    </div>
+                                    
+                                    <div style="color: #666; font-size: 0.9rem; margin-bottom: 0.8rem;">
+                                        📝 {place.get('review_count', 0)} yorum • {place.get('description', '')[:150]}...
+                                    </div>
+                                    
+                                    <div style="display: flex; gap: 0.8rem; margin-top: 1.2rem;">
+                                        {f'<a href="{place.get("website", "")}" target="_blank" style="background: #2196f3; color: white; padding: 0.4rem 0.8rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem;">🌐 Site</a>' if place.get('website') else ''}
+                                        {f'<span style="background: #4caf50; color: white; padding: 0.4rem 0.8rem; border-radius: 15px; font-size: 0.9rem;">📞 {place.get("phone", "")}</span>' if place.get('phone') else ''}
+                                        {tripadvisor_link}
+                                    </div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                    else:
+                        st.warning("❌ Bu konumda yemek mekanı bulunamadı.")
             
             # Silme butonu
             if st.session_state.confirming_delete == plan['id']:
