@@ -369,7 +369,7 @@ elif st.session_state.ai_step == 3:
         save_plans(all_plans)
         
         st.success("🎉 Seyahat planınız başarıyla oluşturuldu!")
-        st.info("👈 Seyahat planlarınızı görmek ve aktivitelerinizi takip etmek için 'Planlarım' sayfasına gidin.")
+        st.info("👈 Seyahat planlarınızı görmek ve aktivitelerinizi takip etmek için 'Seyahatlerim' sayfasına gidin.")
         
         # Plan oluşturuldu flag'ini set et
         st.session_state.ai_plan_created = True
