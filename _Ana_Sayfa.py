@@ -39,7 +39,7 @@ st.markdown("""
     
     .cta-button {
         background: linear-gradient(45deg, #ff7f0e, #ff6b35);
-        color: white;
+        color: white !important;
         padding: 0.75rem 1.5rem;
         border-radius: 25px;
         text-decoration: none;
@@ -109,9 +109,9 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("""
     <div style="background: linear-gradient(135deg, #3e5151 0%, #77bc74 100%); padding: 2rem; border-radius: 15px; text-align: center; color: white; margin-bottom: 1rem;">
-        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;"> Kendi Hedefini Belirle</h3>
+        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">Kendi Hedefini Belirle</h3>
         <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">Nereye gitmek istediğini biliyorsan, hemen seyahat tarzını keşfet ve kişiselleştirilmiş planını oluştur!</p>
-        <a href="/_New_Plan" class="cta-button" style="text-decoration: none; display: inline-block; margin-top: 1rem;">🎯 Hedefimi Belirle</a>
+        <a href="/_New_Plan" class="cta-button" style="text-decoration: none; display: inline-block; margin-top: 1rem;"> Plan Oluştur</a>
     </div>
     """, unsafe_allow_html=True)
 
