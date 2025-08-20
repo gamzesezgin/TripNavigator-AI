@@ -10,7 +10,7 @@ st.set_page_config(
 st.markdown("""
 <style>
     .hero-section {
-        background: linear-gradient(135deg, #2196f3 0%, #4caf50 100%);
+        background: linear-gradient(135deg, #3e5151 0%, #decba4 100%);
         padding: 2rem;
         border-radius: 15px;
         margin-bottom: 2rem;
@@ -71,7 +71,6 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown("""
     <div class="step-card">
-        <h3 style="font-size: 2rem; margin-bottom: 1rem;">1️⃣</h3>
         <h4 style="color: white; margin-bottom: 0.5rem;">Seyahat Hedefini Belirt</h4>
         <p style="color: white;">Nereye gitmek istediğini ve ne yapmak istediğini söyle</p>
     </div>
@@ -80,7 +79,6 @@ with col1:
 with col2:
     st.markdown("""
     <div class="step-card">
-        <h3 style="font-size: 2rem; margin-bottom: 1rem;">2️⃣</h3>
         <h4 style="color: white; margin-bottom: 0.5rem;">Seyahat Tarzını Keşfet</h4>
         <p style="color: white;">Birkaç soruyla sana en uygun seyahat planını bulalım</p>
     </div>
@@ -89,7 +87,6 @@ with col2:
 with col3:
     st.markdown("""
     <div class="step-card">
-        <h3 style="font-size: 2rem; margin-bottom: 1rem;">3️⃣</h3>
         <h4 style="color: white; margin-bottom: 0.5rem;">Planını Kişiselleştir</h4>
         <p style="color: white;">Her gün için özel olarak hazırlanmış aktiviteler</p>
     </div>
@@ -98,7 +95,6 @@ with col3:
 with col4:
     st.markdown("""
     <div class="step-card">
-        <h3 style="font-size: 2rem; margin-bottom: 1rem;">4️⃣</h3>
         <h4 style="color: white; margin-bottom: 0.5rem;">Seyahatini Takip Et</h4>
         <p style="color: white;">Günlük aktiviteler ve önerileri deneyimle</p>
     </div>
@@ -112,8 +108,8 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 15px; text-align: center; color: white; margin-bottom: 1rem;">
-        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">🎯 Kendi Hedefini Belirle</h3>
+    <div style="background: linear-gradient(135deg, #3e5151 0%, #77bc74 100%); padding: 2rem; border-radius: 15px; text-align: center; color: white; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.8rem; margin-bottom: 1rem;"> Kendi Hedefini Belirle</h3>
         <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">Nereye gitmek istediğini biliyorsan, hemen seyahat tarzını keşfet ve kişiselleştirilmiş planını oluştur!</p>
         <a href="/_New_Plan" class="cta-button" style="text-decoration: none; display: inline-block; margin-top: 1rem;">🎯 Hedefimi Belirle</a>
     </div>
@@ -121,7 +117,7 @@ with col1:
 
 with col2:
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 2rem; border-radius: 15px; text-align: center; color: white; margin-bottom: 1rem;">
+    <div style="background: linear-gradient(135deg, #3e5151 0%, #77bc74 100%); padding: 2rem; border-radius: 15px; text-align: center; color: white; margin-bottom: 1rem;">
         <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">🤖 AI Destinasyon Önerisi</h3>
         <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">Nereye gideceğini bilmiyorsan, birkaç soruyla sana en uygun destinasyonu önereyim!</p>
         <a href="/_AI_Recommendation" class="cta-button" style="text-decoration: none; display: inline-block; margin-top: 1rem;">🤖 AI Önerisi Al</a>

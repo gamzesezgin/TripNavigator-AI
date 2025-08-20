@@ -2,9 +2,81 @@ import streamlit as st
 from data_handler import load_plans, save_plans, get_current_week_tasks, mark_task_completed, unmark_task_completed
 from datetime import datetime
 from agents.recommender_agent import recommend_pois
+from agents.wikipedia_agent import get_city_wikipedia_info
 
-st.set_page_config(layout="wide")
-st.title("✈️ Seyahat Planlarım ve Aktivite Takibi")
+st.set_page_config(layout="wide", page_title="Seyahatlerim - TripNavigatorAI")
+
+# Ana sayfadaki turuncudan maviye gradient kullanan CSS stilleri
+st.markdown("""
+<style>
+    .travel-header {
+        background: linear-gradient(45deg, #ff7f0e, #1f77b4);
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        color: white;
+        text-align: left;
+    }
+    
+    .section-card {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 0.5rem 0;
+        border: 1px solid #e9ecef;
+    }
+    
+    .day-section {
+        background: white;
+        padding: 0.8rem;
+        border-radius: 6px;
+        margin: 0.5rem 0;
+        border-left: 3px solid #28a745;
+    }
+    
+    .city-info-box {
+        background: #e3f2fd;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 1px solid #bbdefb;
+    }
+    
+    .info-highlight {
+        background: #fff3cd;
+        padding: 0.8rem;
+        border-radius: 6px;
+        margin: 0.5rem 0;
+        border-left: 3px solid #ffc107;
+    }
+    
+    .delete-alert {
+        background: #f8d7da;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #f5c6cb;
+        margin: 1rem 0;
+    }
+    
+    .main-title {
+        background: linear-gradient(45deg, #ff7f0e, #1f77b4);
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(255, 127, 14, 0.3);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Ana başlık - ana sayfadaki turuncudan maviye gradient kullanarak
+st.markdown("""
+<div class="main-title">
+    <h1 style="margin: 0; font-size: 2.2rem;">✨ Seyahat Planlarım ve Aktivite Takibi</h1>
+    <p style="margin: 0.5rem 0 0 0; font-size: 1.1rem; opacity: 0.9;">Seyahatlerinizi yönetin ve aktivitelerinizi takip edin</p>
+</div>
+""", unsafe_allow_html=True)
 
 if 'confirming_delete' not in st.session_state:
     st.session_state.confirming_delete = None
@@ -19,11 +91,18 @@ else:
     for index, plan in enumerate(reversed(all_plans)):
         st.markdown("---")
         
-        # Plan başlığı ve bilgileri
-        with st.expander(f"✈️ **Seyahat:** {plan['goal']}", expanded=False):
+        # Seyahat başlığı - beyaz container olmadan
+        st.markdown(f"""
+        <div class="travel-header">
+            <h2 style="margin: 0; color: white; font-size: 1.3rem;">📌 {plan['goal']}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Plan içeriği
+        with st.expander(f"📋 Detayları Görüntüle", expanded=False):
             
             # Plan bilgileri
-            col1, col2= st.columns([2, 2])
+            col1, col2 = st.columns([2, 2])
             
             with col1:
                 st.subheader("🗺️ Tüm Günlük Aktiviteler")
@@ -64,104 +143,43 @@ else:
                     st.write("Bu seyahat planı için aktivite bulunmuyor.")
             
             with col2:
-                st.subheader("🌟 Önerilen Mekanlar")
+                st.subheader("🏛️ Şehir Bilgileri")
 
-                st.info("Mekan önerileri için TripAdvisor API kullanılıyor.")
+                # Wikipedia'dan şehir bilgilerini al
+                city_name = plan.get('goal', '')
+                with st.spinner("Şehir bilgileri Wikipedia'dan alınıyor..."):
+                    try:
+                        city_info = get_city_wikipedia_info(city_name)
+                    except Exception as e:
+                        st.error(f"Şehir bilgileri alınamadı: {e}")
+                        city_info = None
 
-                # Tabs oluştur
-                tabs = st.tabs(["🗺️ Gezi Noktaları", "🍽️ Yemek Önerileri"])
-
-                with tabs[0]:
-                    st.caption("TripAdvisor'dan popüler gezi noktaları")
-                    city_or_goal = plan.get('goal', '')
-                    with st.spinner("Gezilecek yerler alınıyor..."):
-                        try:
-                            places = get_popular_attractions(city_or_goal, top_k=8)
-                        except Exception:
-                            places = []
-
-                    if places:
-                        for i, p in enumerate(places):
-                                # Rating yıldızları
-                                rating = p.get('rating', 0)
-                                stars = "⭐" * int(rating) if rating > 0 else "⭐"
-                                
-                                # TripAdvisor linki
-                                tripadvisor_link = f"<a href='{p.get('tripadvisor_url', '')}' target='_blank' style='color: #00AA6C; text-decoration: none;'>🔗 TripAdvisor</a>" if p.get('tripadvisor_url') else ""
-                                
-                                st.markdown(
-                                    f"""
-                                    <div style="border:1px solid #eee; border-radius:10px; padding:12px; margin-bottom:12px;">
-                                        <div style="font-weight:600; font-size:1.2rem; margin-bottom:8px;">{p.get('name','')}</div>
-                                        <div style="font-size:1rem; color:#666; margin-bottom:6px;">
-                                            {p.get('kind','').title()} {('• ' + p.get('city','')) if p.get('city') else ''} {('• ' + p.get('neighborhood','')) if p.get('neighborhood') else ''}
-                                        </div>
-                                        <div style="margin-bottom:8px; color: #FF9800; font-size:1rem;">{stars} {rating:.1f}/5 ({p.get('review_count', 0)} yorum)</div>
-                                        <div style="margin-bottom:8px; font-size:1rem;">{p.get('short_reason','')}</div>
-                                        <div style="margin-bottom:8px; font-size:0.9rem; color:#666;">{p.get('description','')[:150]}...</div>
-                                        <div style="margin-top:12px;">{tripadvisor_link}</div>
-                                    </div>
-                                    """,
-                                    unsafe_allow_html=True,
-                                )
-                    else:
-                        st.info("Gezi önerisi bulunamadı. Hedefi şehir/ülke adı içerecek şekilde yazmayı deneyin.")
-
-                with tabs[1]:
-                    st.caption("🍽️ TripAdvisor'dan popüler yemek mekanları")
+                if city_info:
+                    st.success(f"✅ {city_info['source']} kaynağından bilgiler alındı!")
                     
-                    # Direkt yemek önerilerini göster
-                    city_or_goal = plan.get('goal', '')
-                    with st.spinner("Yemek mekanları alınıyor..."):
-                        try:
-                            from agents.recommender_agent import get_food_recommendations
-                            food_places = get_food_recommendations(city_or_goal, "genel", 6)
-                        except Exception:
-                            food_places = []
-
-                    if food_places:
-                        st.success(f"✅ {len(food_places)} popüler yemek mekanı bulundu!")
-                        
-                        # Sonuçları göster
-                        for i, place in enumerate(food_places):
-                                # Rating yıldızları
-                                rating = place.get('rating', 0)
-                                stars = "⭐" * int(rating) if rating > 0 else "⭐"
-                                
-                                # TripAdvisor linki
-                                tripadvisor_link = f"<a href='{place.get('tripadvisor_url', '')}' target='_blank' style='color: #00AA6C; text-decoration: none;'>🔗 TripAdvisor</a>" if place.get('tripadvisor_url') else ""
-                                
-                                st.markdown(f"""
-                                <div style="background: #fff; border: 2px solid #e0e0e0; border-radius: 15px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-                                        <h4 style="color: #1976d2; margin: 0; font-size: 1.3rem;">{place.get('name', 'İsimsiz')}</h4>
-                                        <div style="text-align: right;">
-                                            <div style="color: #ff9800; font-size: 1.1rem;">{stars} {rating:.1f}/5</div>
-                                            <div style="color: #4caf50; font-size: 1rem;">{place.get('price_level', '💰')}</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div style="color: #666; font-size: 1rem; margin-bottom: 0.8rem;">
-                                        📍 {place.get('neighborhood', '')} {place.get('city', '')}
-                                    </div>
-                                    
-                                    <div style="color: #424242; font-size: 1rem; margin-bottom: 0.8rem;">
-                                        🏷️ {place.get('category', '')} • {place.get('cuisine', '')}
-                                    </div>
-                                    
-                                    <div style="color: #666; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                                        📝 {place.get('review_count', 0)} yorum • {place.get('description', '')[:150]}...
-                                    </div>
-                                    
-                                    <div style="display: flex; gap: 0.8rem; margin-top: 1.2rem;">
-                                        {f'<a href="{place.get("website", "")}" target="_blank" style="background: #2196f3; color: white; padding: 0.4rem 0.8rem; border-radius: 15px; text-decoration: none; font-size: 0.9rem;">🌐 Site</a>' if place.get('website') else ''}
-                                        {f'<span style="background: #4caf50; color: white; padding: 0.4rem 0.8rem; border-radius: 15px; font-size: 0.9rem;">📞 {place.get("phone", "")}</span>' if place.get('phone') else ''}
-                                        {tripadvisor_link}
-                                    </div>
-                                </div>
-                                """, unsafe_allow_html=True)
-                    else:
-                        st.warning("❌ Bu konumda yemek mekanı bulunamadı.")
+                    # Şehir bilgilerini göster
+                    st.markdown(f"""
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #5da35a 100%); 
+                               padding: 1.5rem; border-radius: 15px; color: white; margin-bottom: 1rem;">
+                        <h3 style="color: white; margin-bottom: 1rem;">🏛️ {city_info['title']}</h3>
+                        <p style="color: white; font-size: 1rem; line-height: 1.6;">{city_info['summary']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Öne çıkan yerler
+                    if city_info.get('highlights'):
+                        st.markdown("**🌟 Öne Çıkan Yerler:**")
+                        st.info(city_info['highlights'])
+                    
+                    # Koordinatlar varsa göster
+                    if city_info.get('latitude') and city_info.get('longitude'):
+                        st.markdown(f"**📍 Koordinatlar:** {city_info['latitude']:.4f}, {city_info['longitude']:.4f}")
+                    
+                    # Wikipedia linki
+                    if city_info.get('wikipedia_url'):
+                        st.markdown(f"**📚 Daha fazla bilgi:** [Wikipedia'da {city_info['title']}]({city_info['wikipedia_url']})")
+                else:
+                    st.warning("❌ Şehir bilgileri alınamadı.")
             
             # Silme butonu
             if st.session_state.confirming_delete == plan['id']:

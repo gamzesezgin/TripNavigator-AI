@@ -69,7 +69,7 @@ RAPID_API_KEY=YOUR_RAPID_API_KEY
 #### Rapid API Anahtarı:
 1. [RapidAPI.com](https://rapidapi.com) adresine gidin
 2. Ücretsiz hesap oluşturun
-3. İstediğiniz API'yi seçin (Hotels.com, TripAdvisor, vb.)
+3. İstediğiniz API'yi seçin (Hotels.com, vb.)
 4. API anahtarınızı kopyalayın
 
 ### 7. Uygulamayı Çalıştırın
