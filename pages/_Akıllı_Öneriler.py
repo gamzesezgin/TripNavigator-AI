@@ -173,12 +173,6 @@ ai_questions = [
         "category": "language"
     },
     {
-        "id": "transport",
-        "question": "Ulaşım tercihiniz nedir?",
-        "options": ["Uçakla uzun yolculuk sorun değil", "Kısa mesafeler tercih", "Fark etmez"],
-        "category": "transport"
-    },
-    {
         "id": "interests",
         "question": "Özel ilgi alanlarınız nelerdir?",
         "options": ["Festival ve etkinlikler", "Müzik ve sanat", "Kış sporları", "Dalış ve su sporları", "Trekking ve doğa", "Fotoğrafçılık", "Hepsi"],
