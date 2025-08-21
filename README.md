@@ -146,6 +146,3 @@ TripNavigatorAI/
 - Tercihlerinizi belirtin
 - AI size özel seyahat planı oluştursun
 - Planınızı kaydedin ve düzenleyin
-
-
-
