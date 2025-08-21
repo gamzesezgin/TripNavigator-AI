@@ -96,20 +96,20 @@ def generate_ai_destination_recommendation(answers: List[str], ai_questions: Lis
     distance_preference = "Genel"
     for answer in answers:
         if "türkiye" in answer.lower():
-            distance_preference = "Türkiye içi"
-        elif "avrupa" in answer.lower() or "yakın" in answer.lower():
-            distance_preference = "Avrupa (yakın)"
-        elif "uzak" in answer.lower():
-            distance_preference = "Uzak"
+            distance_preference = "Türkiye"
+        elif "avrupa" in answer.lower():
+            distance_preference = "Avrupa"
+        elif "asya" in answer.lower() or "amerika" in answer.lower() or "afrika" in answer.lower():
+            distance_preference = "Asya/Amerika/Afrika"
     
     # AI prompt'unu oluştur
     prompt = f"""
 Bu tercihlere göre dünyadaki en uygun 3 destinasyon öner. 
 
 ÖNEMLİ: 
-- Eğer "Türkiye içi" seçildiyse, SADECE Türkiye içi destinasyonlar öner
-- Eğer "Avrupa (yakın)" seçildiyse, SADECE Avrupa destinasyonları öner  
-- Eğer "Uzak" seçildiyse, farklı kıtalardan destinasyonlar öner
+- Eğer "Türkiye" seçildiyse, SADECE Türkiye içi destinasyonlar öner
+- Eğer "Avrupa" seçildiyse, SADECE Avrupa destinasyonları öner  
+- Eğer "Asya/Amerika/Afrika" seçildiyse, bu kıtalardan destinasyonlar öner
 
 Kullanıcı Tercihleri:
 """
@@ -217,9 +217,9 @@ def generate_fallback_destinations(answers: List[str], ai_questions: List[Dict[s
     for answer in answers:
         if "türkiye" in answer.lower():
             distance_preference = "türkiye"
-        elif "avrupa" in answer.lower() or "yakın" in answer.lower():
+        elif "avrupa" in answer.lower():
             distance_preference = "avrupa"
-        elif "uzak" in answer.lower():
+        elif "asya" in answer.lower() or "amerika" in answer.lower() or "afrika" in answer.lower():
             distance_preference = "uzak"
     
     # Türkiye içi destinasyonlar

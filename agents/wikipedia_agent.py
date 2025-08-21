@@ -133,9 +133,20 @@ class WikipediaAgent:
     # değişiklik yapmanıza gerek yok, onlar olduğu gibi kalabilir.
     def process_city_info(self, wiki_data: Dict, original_city: str) -> Dict:
         extract = wiki_data.get('extract', '')
-        if len(extract) > 300:
-            extract = extract[:300] + "..."
         
+        # Akıllı kısaltma bloğu
+        limit = 400 # Karakter limitini biraz artırabiliriz.
+        if len(extract) > limit:
+            # Limit karakterinden önceki son noktanın pozisyonunu bul
+            last_period_index = extract.rfind('.', 0, limit)
+            
+            if last_period_index != -1:
+                # Eğer bir nokta bulunduysa, metni o noktadan kes.
+                extract = extract[:last_period_index + 1]
+            else:
+                # Eğer hiç nokta bulunamadıysa, eski yöntemle kes (nadiren olur).
+                extract = extract[:limit] + "..."
+
         thumbnail = wiki_data.get('thumbnail', {})
         image_url = thumbnail.get('source', '') if thumbnail else ''
         
@@ -147,7 +158,6 @@ class WikipediaAgent:
             'wikipedia_url': wiki_data.get('content_urls', {}).get('desktop', {}).get('page', ''),
             'source': 'Wikipedia'
         }
-    
 
     
     def get_fallback_city_info(self, city_name: str) -> Dict:
