@@ -10,7 +10,7 @@ st.set_page_config(layout="wide", page_title="Seyahatlerim - TripNavigatorAI")
 st.markdown("""
 <style>
     .travel-header {
-        background: linear-gradient(2deg, #ff7f0e, #1f77b4);
+        background: linear-gradient(135deg, #3e5151 0%, #decba4 100%);
         padding: 0.6rem 1rem;
         border-radius: 8px;
         margin-bottom: 1rem;
@@ -59,7 +59,7 @@ st.markdown("""
     }
     
     .main-title {
-        background: linear-gradient(45deg, #ff7f0e, #1f77b4);
+        background: linear-gradient(135deg, #3e5151 0%, #decba4 100%);
         padding: 1.5rem;
         border-radius: 12px;
         text-align: center;
