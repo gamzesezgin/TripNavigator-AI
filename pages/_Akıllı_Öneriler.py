@@ -327,9 +327,12 @@ elif st.session_state.ai_step == 3:
         
         if api_key:
             try:
+                day_names = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
+                start_day = day_names[st.session_state.start_day]
                 api_plan = generate_plan_with_gemini(
                     st.session_state.recommended_destination,
-                    plan_days=st.session_state.plan_days
+                    plan_days=st.session_state.plan_days,
+                    start_day=start_day
                 )
                 
                 if api_plan and 'days' in api_plan:

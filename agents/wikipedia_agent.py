@@ -18,7 +18,7 @@ class WikipediaAgent:
         # Bu, 429 hatasını çözmek için en önemli adımdır.
         # E-posta veya bir web sitesi linki vermeniz tavsiye edilir.
         self.headers = {
-            'User-Agent': 'TravelPlannerApp/1.0 (sizin_emailiniz@example.com)'
+            'User-Agent': 'TravelPlannerApp/1.0 (your_email@example.com)'
         }
 
     def search_city(self, city_name: str, max_retries: int = 3) -> Optional[Dict]:
@@ -31,7 +31,7 @@ class WikipediaAgent:
             try:
                 # ... (params ve response = requests.get(...) kısmı aynı)
                 params = { 'action': 'query', 'format': 'json', 'list': 'search', 'srsearch': city_name, 'srlimit': 1, 'utf8': 1 }
-                response = requests.get(self.search_url, params=params, headers=self.headers)
+                response = requests.get(self.search_url, params=params, headers=self.headers, timeout=15)
                 response.raise_for_status()
                 data = response.json()
                 
@@ -63,7 +63,7 @@ class WikipediaAgent:
         try:
             url = f"{self.base_url}{quote(page_title)}"
             # DÜZELTME 1: Her isteğe headers (kimlik bilgisi) ekliyoruz.
-            response = requests.get(url, headers=self.headers)
+            response = requests.get(url, headers=self.headers, timeout=15)
             response.raise_for_status()
             data = response.json()
             
@@ -71,8 +71,7 @@ class WikipediaAgent:
                 'title': data.get('title', ''),
                 'extract': data.get('extract', ''),
                 'content_urls': data.get('content_urls', {}),
-                'thumbnail': data.get('thumbnail', {}),
-                'coordinates': data.get('coordinates', {})
+                'thumbnail': data.get('thumbnail', {})
             }
             
         except requests.exceptions.HTTPError as http_err:
@@ -137,10 +136,6 @@ class WikipediaAgent:
         if len(extract) > 300:
             extract = extract[:300] + "..."
         
-        coordinates = wiki_data.get('coordinates', {})
-        lat = coordinates.get('lat', 0)
-        lon = coordinates.get('lon', 0)
-        
         thumbnail = wiki_data.get('thumbnail', {})
         image_url = thumbnail.get('source', '') if thumbnail else ''
         
@@ -148,12 +143,12 @@ class WikipediaAgent:
             'city_name': original_city,
             'title': wiki_data.get('title', original_city),
             'summary': extract,
-            'latitude': lat,
-            'longitude': lon,
             'image_url': image_url,
             'wikipedia_url': wiki_data.get('content_urls', {}).get('desktop', {}).get('page', ''),
             'source': 'Wikipedia'
         }
+    
+
     
     def get_fallback_city_info(self, city_name: str) -> Dict:
         # Bu fonksiyon olduğu gibi kalabilir.
@@ -163,7 +158,7 @@ class WikipediaAgent:
 # Global agent instance
 wikipedia_agent = WikipediaAgent()
 
-@st.cache_data
+@st.cache_data(ttl=7200)  # 2 saat cache
 def get_city_wikipedia_info(city_name: str) -> Dict:
     """
     Şehir için Wikipedia bilgilerini alır

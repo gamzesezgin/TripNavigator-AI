@@ -159,15 +159,8 @@ elif st.session_state.step == 2:
         )
         
         # Kişilik profili
-        col1, col2 = st.columns([1, 1])
-        
-        with col1:
-            st.markdown("**🎭 Seyahat Kişiliğiniz:**")
-            st.info(f"**{personality_analysis['personality_type']}**")
-            st.write(personality_analysis['description'])
-            
-            st.markdown("**💡 Seyahat Tarzınız:**")
-            st.success(personality_analysis['travel_style'])
+        st.markdown("**🎭 Kişilik Analizi Sonucunuz:**")
+        st.info(personality_analysis['description'])
         
         
         st.markdown("---")
@@ -189,7 +182,9 @@ elif st.session_state.step == 3:
             travel_style = st.session_state.get('travel_style', 'Genel')
             
             # API'den plan al
-            api_plan = generate_plan_with_gemini(st.session_state.user_goal, travel_style, st.session_state.plan_days)
+            day_names = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
+            start_day = day_names[st.session_state.start_day]
+            api_plan = generate_plan_with_gemini(st.session_state.user_goal, travel_style, st.session_state.plan_days, start_day)
             
             if api_plan and 'days' in api_plan:
                 # API'den gelen planı kullan
@@ -205,7 +200,7 @@ elif st.session_state.step == 3:
             else:
                 # API başarısız olursa fallback plan kullan
                 st.warning("⚠️ AI servisi şu anda yanıt veremiyor. Varsayılan plan oluşturuluyor...")
-                fallback_plan = generate_fallback_plan(st.session_state.user_goal, travel_style, st.session_state.plan_days)
+                fallback_plan = generate_fallback_plan(st.session_state.user_goal, travel_style, st.session_state.plan_days, start_day)
                 weekly_tasks = []
                 for day_data in fallback_plan['days']:
                     day_name = day_data['day']
@@ -218,7 +213,7 @@ elif st.session_state.step == 3:
         except Exception as e:
             # API hatası durumunda fallback plan kullan
             st.warning("⚠️ AI servisi zaman aşımına uğradı. Varsayılan plan oluşturuluyor...")
-            fallback_plan = generate_fallback_plan(st.session_state.user_goal, travel_style, st.session_state.plan_days)
+            fallback_plan = generate_fallback_plan(st.session_state.user_goal, travel_style, st.session_state.plan_days, start_day)
             weekly_tasks = []
             for day_data in fallback_plan['days']:
                 day_name = day_data['day']

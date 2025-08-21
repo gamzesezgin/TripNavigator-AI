@@ -165,19 +165,7 @@ else:
                         <p style="color: white; font-size: 1rem; line-height: 1.6;">{city_info['summary']}</p>
                     </div>
                     """, unsafe_allow_html=True)
-                    
-                    # Öne çıkan yerler
-                    if city_info.get('highlights'):
-                        st.markdown("**🌟 Öne Çıkan Yerler:**")
-                        st.info(city_info['highlights'])
-                    
-                    # Koordinatlar varsa göster
-                    if city_info.get('latitude') and city_info.get('longitude'):
-                        st.markdown(f"**📍 Koordinatlar:** {city_info['latitude']:.4f}, {city_info['longitude']:.4f}")
-                    
-                    # Wikipedia linki
-                    if city_info.get('wikipedia_url'):
-                        st.markdown(f"**📚 Daha fazla bilgi:** [Wikipedia'da {city_info['title']}]({city_info['wikipedia_url']})")
+                   
                 else:
                     st.warning("❌ Şehir bilgileri alınamadı.")
             

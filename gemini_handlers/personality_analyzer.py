@@ -38,9 +38,9 @@ def analyze_personality_from_answers(answers, user_goal):
     """
     if not answers:
         return {
-            "personality_type": "Genel Seyahatçı",
-            "description": "Çeşitli deneyimleri denemeye açıksınız. Farklı aktiviteler ve kültürler sizi heyecanlandırıyor.",
-            "travel_style": "Çeşitli deneyimler sunan seyahatler"
+            "personality_type": "Test Sonucu Belirlenemedi",
+            "description": "Test sonuçlarınıza göre kişilik profiliniz belirlenemedi. Genel seyahat tercihleriniz dikkate alınacak.",
+            "travel_style": "Genel seyahat tercihleri"
         }
     
     # Her cevap için analiz yap
@@ -71,58 +71,58 @@ def analyze_personality_from_answers(answers, user_goal):
         # Seyahat tarzına göre kişilik türünü belirle
         if "doğa" in user_goal_lower or "macera" in user_goal_lower or "isviçre" in user_goal_lower or "norveç" in user_goal_lower:
             if dominant_trait in ["Aktif", "Dengeli"]:
-                personality_type = "Macera Seyahatçısı"
-                description = "Aktif ve macera dolu seyahatler sizi heyecanlandırıyor. Zorlu parkurlar ve doğa aktiviteleri tercih ediyorsunuz."
-                travel_style = "Macera ve doğa odaklı seyahatler"
+                personality_type = "Yoğun Doğa Aktivitesi Tercih Eden"
+                description = "Yoğun doğa aktiviteleri ve macera dolu seyahatler sizi heyecanlandırıyor."
+                travel_style = "Yoğun doğa aktivitesi odaklı seyahatler"
             else:
-                personality_type = "Doğa Gözlemcisi"
-                description = "Doğanın güzelliklerini keşfetmeyi seviyorsunuz. Sakin ve huzurlu doğa aktiviteleri tercih ediyorsunuz."
-                travel_style = "Doğa ve gözlem odaklı seyahatler"
+                personality_type = "Rahat Doğa Aktivitesi Tercih Eden"
+                description = "Sakin doğa aktiviteleri ve gözlem odaklı seyahatler sizi mutlu ediyor."
+                travel_style = "Rahat doğa aktivitesi odaklı seyahatler"
         
         elif "kültür" in user_goal_lower or "tarih" in user_goal_lower or "roma" in user_goal_lower or "paris" in user_goal_lower or "istanbul" in user_goal_lower:
             if dominant_trait in ["Aktif", "Dengeli"]:
-                personality_type = "Kültür Seyahatçısı"
-                description = "Tarih, sanat ve kültür sizin için çok önemli. Müzeler, tarihi yerler ve yerel gelenekler ilginizi çekiyor."
-                travel_style = "Kültür ve tarih odaklı seyahatler"
+                personality_type = "Yoğun Kültür Aktivitesi Tercih Eden"
+                description = "Yoğun kültür aktiviteleri ve tarih odaklı seyahatler sizi heyecanlandırıyor."
+                travel_style = "Yoğun kültür aktivitesi odaklı seyahatler"
             else:
-                personality_type = "Tarih Meraklısı"
-                description = "Geçmişin izlerini sürmeyi seviyorsunuz. Tarihi yerler ve antik kalıntılar ilginizi çekiyor."
-                travel_style = "Tarih ve arkeoloji odaklı seyahatler"
+                personality_type = "Rahat Kültür Aktivitesi Tercih Eden"
+                description = "Rahat kültür aktiviteleri ve tarih gözlemi sizi mutlu ediyor."
+                travel_style = "Rahat kültür aktivitesi odaklı seyahatler"
         
         elif "gastronomi" in user_goal_lower or "yemek" in user_goal_lower or "italya" in user_goal_lower or "fransa" in user_goal_lower or "tokyo" in user_goal_lower:
             if dominant_trait in ["Aktif", "Dengeli"]:
-                personality_type = "Gastronomi Seyahatçısı"
-                description = "Yemek kültürü ve lezzetli deneyimler sizin için vazgeçilmez. Yerel restoranlar ve geleneksel tatlar arıyorsunuz."
-                travel_style = "Gastronomi ve lezzet odaklı seyahatler"
+                personality_type = "Yoğun Gastronomi Aktivitesi Tercih Eden"
+                description = "Yoğun gastronomi aktiviteleri ve lezzet odaklı seyahatler sizi heyecanlandırıyor."
+                travel_style = "Yoğun gastronomi aktivitesi odaklı seyahatler"
             else:
-                personality_type = "Lezzet Avcısı"
-                description = "Yeni tatlar keşfetmeyi seviyorsunuz. Sokak lezzetleri ve yerel mutfaklar ilginizi çekiyor."
-                travel_style = "Lezzet ve mutfak kültürü odaklı seyahatler"
+                personality_type = "Rahat Gastronomi Aktivitesi Tercih Eden"
+                description = "Rahat gastronomi aktiviteleri ve lezzet keşfi sizi mutlu ediyor."
+                travel_style = "Rahat gastronomi aktivitesi odaklı seyahatler"
         
         elif "lüks" in user_goal_lower or "kaliteli" in user_goal_lower or "bali" in user_goal_lower or "santorini" in user_goal_lower:
-            personality_type = "Lüks Seyahatçısı"
-            description = "Konfor ve kalite sizin için öncelikli. Lüks oteller ve premium deneyimler tercih ediyorsunuz."
-            travel_style = "Lüks ve konfor odaklı seyahatler"
+            personality_type = "Lüks Aktivite Tercih Eden"
+            description = "Lüks ve kaliteli aktiviteler sizi mutlu ediyor."
+            travel_style = "Lüks aktivite odaklı seyahatler"
         
         elif "dinlenme" in user_goal_lower or "tatil" in user_goal_lower or "plaj" in user_goal_lower:
-            personality_type = "Dinlenme Seyahatçısı"
-            description = "Huzur ve dinlenme odaklı seyahatler sizi mutlu ediyor. Rahat aktiviteler ve sakin ortamlar arıyorsunuz."
-            travel_style = "Dinlenme ve huzur odaklı seyahatler"
+            personality_type = "Dinlenme Aktivitesi Tercih Eden"
+            description = "Dinlenme ve huzur odaklı aktiviteler sizi mutlu ediyor."
+            travel_style = "Dinlenme aktivitesi odaklı seyahatler"
         
         else:
-            # Genel analiz
+            # Genel analiz - Test sonuçlarına göre
             if dominant_trait in ["Aktif", "Dengeli"]:
-                personality_type = "Aktif Seyahatçı"
-                description = "Aktif ve dinamik seyahatler sizi heyecanlandırıyor. Çeşitli aktiviteler ve deneyimler arıyorsunuz."
-                travel_style = "Aktif ve dinamik seyahatler"
+                personality_type = "Yoğun Aktivite Tercih Eden"
+                description = "Yoğun aktiviteler ve dinamik seyahatler sizi heyecanlandırıyor."
+                travel_style = "Yoğun aktivite odaklı seyahatler"
             elif dominant_trait in ["Rahat", "Esnek"]:
-                personality_type = "Esnek Seyahatçı"
-                description = "Esnek ve uyumlu seyahatler sizi mutlu ediyor. Anlık kararlarla ilerlemeyi seviyorsunuz."
-                travel_style = "Esnek ve uyumlu seyahatler"
+                personality_type = "Rahat Aktivite Tercih Eden"
+                description = "Rahat ve esnek seyahatler sizi mutlu ediyor."
+                travel_style = "Rahat aktivite odaklı seyahatler"
             else:
-                personality_type = "Genel Seyahatçı"
-                description = "Çeşitli deneyimleri denemeye açıksınız. Farklı aktiviteler ve kültürler sizi heyecanlandırıyor."
-                travel_style = "Çeşitli deneyimler sunan seyahatler"
+                personality_type = "Dengeli Aktivite Tercih Eden"
+                description = "Dengeli aktiviteler ve çeşitli deneyimler sizi mutlu ediyor."
+                travel_style = "Dengeli aktivite odaklı seyahatler"
         
         return {
             "personality_type": personality_type,
@@ -131,9 +131,9 @@ def analyze_personality_from_answers(answers, user_goal):
         }
     
     return {
-        "personality_type": "Genel Seyahatçı",
-        "description": "Çeşitli deneyimleri denemeye açıksınız. Farklı aktiviteler ve kültürler sizi heyecanlandırıyor.",
-        "travel_style": "Çeşitli deneyimler sunan seyahatler"
+        "personality_type": "Test Sonucu Belirlenemedi",
+        "description": "Kişilik profiliniz belirlenemedi. Genel seyahat tercihleriniz dikkate alınacak.",
+        "travel_style": "Genel seyahat tercihleri"
     }
 
 def analyze_culture_travel_personality(answers):

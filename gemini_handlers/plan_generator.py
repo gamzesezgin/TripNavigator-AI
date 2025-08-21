@@ -79,11 +79,15 @@ def call_gemini_api(prompt: str) -> Dict[str, Any]:
         st.error(f"API isteği sırasında hata: {e}")
         return None
 
-def generate_plan_with_gemini(goal: str, travel_style: str = None, plan_days: int = 3) -> Dict[str, Any]:
+def generate_plan_with_gemini(goal: str, travel_style: str = None, plan_days: int = 3, start_day: str = "Pazartesi") -> Dict[str, Any]:
     """
     Gemini API kullanarak detaylı seyahat planı oluşturur
     """
     print(f"🤖 Plan Üretimi Başlatılıyor: {goal}")
+    
+    # Gün isimlerini belirle
+    day_names = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
+    start_day_index = day_names.index(start_day) if start_day in day_names else 0
     
     # Seyahat tarzına göre prompt oluştur
     style_context = ""
@@ -151,23 +155,30 @@ Lütfen şu formatta yanıt ver:
 """
     
     # Dinamik gün sayısına göre prompt oluştur
-    for day in range(1, plan_days + 1):
+    for day in range(plan_days):
+        current_day_index = (start_day_index + day) % 7
+        current_day_name = day_names[current_day_index]
         prompt += f"""
-GÜN {day}:
-- 09:00: [Aktivite adı ve açıklaması]
-- 12:00: [Aktivite adı ve açıklaması]
-- 15:00: [Aktivite adı ve açıklaması]
-- 18:00: [Aktivite adı ve açıklaması]
+{current_day_name}:
+- [Aktivite adı ve açıklaması]
+- [Aktivite adı ve açıklaması]
+- [Aktivite adı ve açıklaması]
+- [Aktivite adı ve açıklaması]
 """
     
     prompt += f"""
 ÖNEMLİ:
-- Her aktivite için saat belirt
-- Aktivite sırası mantıklı olsun (yakın yerler bir arada)
-- Yemek molaları dahil edilsin
-- Ulaşım bilgileri eklenebilir
-- Bütçe dostu ve lüks seçenekler karışık olsun
-- Yerel deneyimler ve turistik yerler dengeli olsun
+- Dil ve Ton: Bana ikinci tekil şahıs ("sen/siz") kullanarak hitap et. "Sabah ilk olarak Topkapı Sarayı'nı keşfedebilirsin" gibi yönlendirici ve tavsiye veren bir dil kullan. Asla "ilk olarak sarayı geziyoruz, sonra yemeğe gidiyoruz" gibi "biz" diliyle yazma.
+
+- Mantıksal Akış: Her günün planını, mekanların birbirine yakınlığını göz önünde bulundurarak coğrafi olarak mantıklı bir sırayla oluştur. Birbirine uzak yerler arasında gidip gelerek zaman kaybettirme.
+
+- Yemek Molaları: Her gün için en az bir öğle ve bir akşam yemeği önerisi ekle. Bu öneriler gezilen bölgeye yakın olmalı.
+
+- Doğal Bilgi Akışı: Ulaşım, bütçe ve diğer notları parantez içinde verme. Bunun yerine, "Karaköy'e vapurla geçtikten sonra, sizi ortalama bir bütçeyle harika lezzetler sunan bir esnaf lokantası karşılayacak" gibi akıcı ve doğal cümleler kur.
+
+- Dengeli Seçenekler: Hem dünyaca ünlü turistik yerlere (Ayasofya, Kapalıçarşı gibi) hem de daha az bilinen yerel deneyimlere (Balat'ta bir kahve molası, Kadıköy balık pazarını gezmek gibi) planda yer ver. Yemek önerilerinde de bütçe dostu esnaf lokantaları ve lüks restoranlar gibi farklı seçenekler sun.
+
+- Dengeli Plan: Dünyaca ünlü turistik yerlere (İstanbul'daAyasofya, Kapalıçarşı gibi), ikonik yemek duraklarını (Viyana'da Figlmüller ve Kafe Demel vb.), şehrin mutlaka görülmesi gereken turistik yerlerini dengeli bir şekilde programa dahil et.
 
 Sadece bu formatta yanıt ver, başka açıklama ekleme.
 """
@@ -221,7 +232,8 @@ def parse_ai_plan(content: str) -> Dict[str, Any]:
                 continue
             
             # Gün başlığını kontrol et (daha esnek)
-            if (line.upper().startswith('GÜN ') or 
+            day_names = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
+            is_day_header = (line.upper().startswith('GÜN ') or 
                 line.upper().startswith('DAY ') or 
                 line.upper().startswith('1. GÜN') or
                 line.upper().startswith('2. GÜN') or
@@ -229,8 +241,10 @@ def parse_ai_plan(content: str) -> Dict[str, Any]:
                 line.upper().startswith('4. GÜN') or
                 line.upper().startswith('5. GÜN') or
                 line.upper().startswith('6. GÜN') or
-                line.upper().startswith('7. GÜN')):
-                
+                line.upper().startswith('7. GÜN') or
+                any(line.startswith(day) for day in day_names))
+            
+            if is_day_header:
                 # Önceki günü kaydet
                 if current_day and current_activities:
                     plan["days"].append({
@@ -275,7 +289,7 @@ def parse_ai_plan(content: str) -> Dict[str, Any]:
         print(f"Plan parse hatası: {e}")
         return None
 
-def generate_fallback_plan(goal: str, travel_style: str = None, plan_days: int = 3) -> Dict[str, Any]:
+def generate_fallback_plan(goal: str, travel_style: str = None, plan_days: int = 3, start_day: str = "Pazartesi") -> Dict[str, Any]:
     """
     AI yanıtı alınamadığında fallback plan oluşturur
     """
@@ -289,12 +303,17 @@ Format:
 """
     
     # Dinamik gün sayısına göre fallback prompt oluştur
-    for day in range(1, plan_days + 1):
+    day_names = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
+    start_day_index = day_names.index(start_day) if start_day in day_names else 0
+    
+    for day in range(plan_days):
+        current_day_index = (start_day_index + day) % 7
+        current_day_name = day_names[current_day_index]
         simple_prompt += f"""
-GÜN {day}:
-- 09:00: Aktivite 1
-- 12:00: Aktivite 2
-- 15:00: Aktivite 3
+{current_day_name}:
+- Aktivite 1
+- Aktivite 2
+- Aktivite 3
 """
     
     simple_prompt += """
@@ -327,7 +346,7 @@ Sadece bu formatta yanıt ver.
         print("🔄 Kod içi plana geçiliyor...")
         return generate_hardcoded_fallback_plan(goal, travel_style, plan_days)
 
-def generate_hardcoded_fallback_plan(goal: str, travel_style: str = None, plan_days: int = 3) -> Dict[str, Any]:
+def generate_hardcoded_fallback_plan(goal: str, travel_style: str = None, plan_days: int = 3, start_day: str = "Pazartesi") -> Dict[str, Any]:
     """
     AI tamamen çalışmadığında kod içi plan şablonları kullanır
     """
@@ -339,19 +358,24 @@ def generate_hardcoded_fallback_plan(goal: str, travel_style: str = None, plan_d
     if "roma" in goal_lower:
         days = []
         roma_activities = [
-            ["09:00: Colosseum ve Roman Forum ziyareti", "12:00: Vittorio Emanuele II Anıtı ve Piazza Venezia", "15:00: Trevi Çeşmesi ve Pantheon", "18:00: Piazza Navona ve Campo de' Fiori"],
-            ["09:00: Vatikan Müzeleri ve Sistine Şapeli", "12:00: St. Peter's Bazilikası", "15:00: Castel Sant'Angelo", "18:00: Trastevere mahallesi akşam yemeği"],
-            ["09:00: Villa Borghese ve Borghese Galerisi", "12:00: Piazza del Popolo", "15:00: İspanyol Merdivenleri", "18:00: Via del Corso alışveriş"],
-            ["09:00: Ostia Antica arkeolojik alanı", "12:00: Tivoli ve Villa d'Este", "15:00: Hadrian Villası", "18:00: Roma'da geleneksel yemek"],
-            ["09:00: Trastevere mahallesi keşfi", "12:00: Testaccio pazarı", "15:00: Aventino Tepesi", "18:00: Roma gece hayatı"],
-            ["09:00: Borghese Galerisi", "12:00: Villa Medici", "15:00: Pincio Tepesi", "18:00: Roma'da son akşam"],
-            ["09:00: Roma'da son kahvaltı", "12:00: Son alışveriş", "15:00: Roma'ya veda", "18:00: Dönüş hazırlığı"]
+            ["Colosseum ve Roman Forum ziyareti", "Vittorio Emanuele II Anıtı ve Piazza Venezia", "Trevi Çeşmesi ve Pantheon", "Piazza Navona ve Campo de' Fiori"],
+            ["Vatikan Müzeleri ve Sistine Şapeli", "St. Peter's Bazilikası", "Castel Sant'Angelo", "Trastevere mahallesi akşam yemeği"],
+            ["Villa Borghese ve Borghese Galerisi", "Piazza del Popolo", "İspanyol Merdivenleri", "Via del Corso alışveriş"],
+            ["Ostia Antica arkeolojik alanı", "Tivoli ve Villa d'Este", "Hadrian Villası", "Roma'da geleneksel yemek"],
+            ["Trastevere mahallesi keşfi", "Testaccio pazarı", "Aventino Tepesi", "Roma gece hayatı"],
+            ["Borghese Galerisi", "Villa Medici", "Pincio Tepesi", "Roma'da son akşam"],
+            ["Roma'da son kahvaltı", "Son alışveriş", "Roma'ya veda", "Dönüş hazırlığı"]
         ]
         
-        for day in range(1, min(plan_days + 1, 8)):
+        day_names = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
+        start_day_index = day_names.index(start_day) if start_day in day_names else 0
+        
+        for day in range(min(plan_days, 7)):
+            current_day_index = (start_day_index + day) % 7
+            current_day_name = day_names[current_day_index]
             days.append({
-                "day": f"GÜN {day}",
-                "activities": roma_activities[day - 1]
+                "day": current_day_name,
+                "activities": roma_activities[day]
             })
         
         return {
@@ -362,19 +386,21 @@ def generate_hardcoded_fallback_plan(goal: str, travel_style: str = None, plan_d
     elif "paris" in goal_lower:
         days = []
         paris_activities = [
-            ["09:00: Eiffel Kulesi ziyareti", "12:00: Champs-Élysées yürüyüşü", "15:00: Arc de Triomphe", "18:00: Seine Nehri tekne turu"],
-            ["09:00: Louvre Müzesi", "12:00: Notre-Dame Katedrali", "15:00: Sainte-Chapelle", "18:00: Montmartre ve Sacré-Cœur"],
-            ["09:00: Versailles Sarayı", "12:00: Musée d'Orsay", "15:00: Place de la Concorde", "18:00: Tuileries Bahçesi"],
-            ["09:00: Musée Rodin", "12:00: Invalides", "15:00: Champ de Mars", "18:00: Paris'te geleneksel yemek"],
-            ["09:00: Père Lachaise Mezarlığı", "12:00: Belleville mahallesi", "15:00: Canal Saint-Martin", "18:00: Paris gece hayatı"],
-            ["09:00: Centre Pompidou", "12:00: Marais mahallesi", "15:00: Place des Vosges", "18:00: Paris'te son akşam"],
-            ["09:00: Paris'te son kahvaltı", "12:00: Son alışveriş", "15:00: Paris'e veda", "18:00: Dönüş hazırlığı"]
+            ["Eiffel Kulesi ziyareti", "Champs-Élysées yürüyüşü", "Arc de Triomphe", "Seine Nehri tekne turu"],
+            ["Louvre Müzesi", "Notre-Dame Katedrali", "Sainte-Chapelle", "Montmartre ve Sacré-Cœur"],
+            ["Versailles Sarayı", "Musée d'Orsay", "Place de la Concorde", "Tuileries Bahçesi"],
+            ["Musée Rodin", "Invalides", "Champ de Mars", "Paris'te geleneksel yemek"],
+            ["Père Lachaise Mezarlığı", "Belleville mahallesi", "Canal Saint-Martin", "Paris gece hayatı"],
+            ["Centre Pompidou", "Marais mahallesi", "Place des Vosges", "Paris'te son akşam"],
+            ["Paris'te son kahvaltı", "Son alışveriş", "Paris'e veda", "Dönüş hazırlığı"]
         ]
         
-        for day in range(1, min(plan_days + 1, 8)):
+        for day in range(min(plan_days, 7)):
+            current_day_index = (start_day_index + day) % 7
+            current_day_name = day_names[current_day_index]
             days.append({
-                "day": f"GÜN {day}",
-                "activities": paris_activities[day - 1]
+                "day": current_day_name,
+                "activities": paris_activities[day]
             })
         
         return {
@@ -385,19 +411,21 @@ def generate_hardcoded_fallback_plan(goal: str, travel_style: str = None, plan_d
     elif "istanbul" in goal_lower:
         days = []
         istanbul_activities = [
-            ["09:00: Ayasofya ve Sultanahmet Camii", "12:00: Topkapı Sarayı", "15:00: Yerebatan Sarnıcı", "18:00: Sultanahmet Meydanı"],
-            ["09:00: Kapalı Çarşı alışveriş", "12:00: Galata Kulesi", "15:00: İstiklal Caddesi yürüyüşü", "18:00: Boğaz turu"],
-            ["09:00: Dolmabahçe Sarayı", "12:00: Ortaköy Camii", "15:00: Beşiktaş ve Nişantaşı", "18:00: Taksim Meydanı"],
-            ["09:00: Süleymaniye Camii", "12:00: Fatih mahallesi", "15:00: Eyüp Sultan Camii", "18:00: İstanbul'da geleneksel yemek"],
-            ["09:00: Büyükada turu", "12:00: Adalar keşfi", "15:00: Deniz manzarası", "18:00: İstanbul gece hayatı"],
-            ["09:00: Çamlıca Tepesi", "12:00: Üsküdar mahallesi", "15:00: Kız Kulesi", "18:00: İstanbul'da son akşam"],
-            ["09:00: İstanbul'da son kahvaltı", "12:00: Son alışveriş", "15:00: İstanbul'a veda", "18:00: Dönüş hazırlığı"]
+            ["Ayasofya ve Sultanahmet Camii", "Topkapı Sarayı", "Yerebatan Sarnıcı", "Sultanahmet Meydanı"],
+            ["Kapalı Çarşı alışveriş", "Galata Kulesi", "İstiklal Caddesi yürüyüşü", "Boğaz turu"],
+            ["Dolmabahçe Sarayı", "Ortaköy Camii", "Beşiktaş ve Nişantaşı", "Taksim Meydanı"],
+            ["Süleymaniye Camii", "Fatih mahallesi", "Eyüp Sultan Camii", "İstanbul'da geleneksel yemek"],
+            ["Büyükada turu", "Adalar keşfi", "Deniz manzarası", "İstanbul gece hayatı"],
+            ["Çamlıca Tepesi", "Üsküdar mahallesi", "Kız Kulesi", "İstanbul'da son akşam"],
+            ["İstanbul'da son kahvaltı", "Son alışveriş", "İstanbul'a veda", "Dönüş hazırlığı"]
         ]
         
-        for day in range(1, min(plan_days + 1, 8)):
+        for day in range(min(plan_days, 7)):
+            current_day_index = (start_day_index + day) % 7
+            current_day_name = day_names[current_day_index]
             days.append({
-                "day": f"GÜN {day}",
-                "activities": istanbul_activities[day - 1]
+                "day": current_day_name,
+                "activities": istanbul_activities[day]
             })
         
         return {
@@ -409,19 +437,21 @@ def generate_hardcoded_fallback_plan(goal: str, travel_style: str = None, plan_d
         # Genel plan şablonu
         days = []
         general_activities = [
-            ["09:00: Şehir merkezi keşif turu", "12:00: Ana turistik yerler ziyareti", "15:00: Yerel restoranlarda yemek", "18:00: Akşam şehir manzarası"],
-            ["09:00: Müze ve kültür merkezleri", "12:00: Tarihi yerler ziyareti", "15:00: Yerel pazar alışverişi", "18:00: Geleneksel yemek deneyimi"],
-            ["09:00: Doğa ve park ziyaretleri", "12:00: Alışveriş ve eğlence", "15:00: Kafeler ve barlar", "18:00: Veda akşam yemeği"],
-            ["09:00: Şehir dışı tur", "12:00: Yakın kasaba ziyareti", "15:00: Doğa aktiviteleri", "18:00: Yerel deneyimler"],
-            ["09:00: Sanat galerileri", "12:00: Tarihi mahalleler", "15:00: Yerel el sanatları", "18:00: Kültürel gösteriler"],
-            ["09:00: Şehir parkları", "12:00: Rekreasyon alanları", "15:00: Spor aktiviteleri", "18:00: Şehir gece hayatı"],
-            ["09:00: Son gün kahvaltısı", "12:00: Son alışveriş", "15:00: Şehre veda", "18:00: Dönüş hazırlığı"]
+            ["Şehir merkezi keşif turu", "Ana turistik yerler ziyareti", "Yerel restoranlarda yemek", "Akşam şehir manzarası"],
+            ["Müze ve kültür merkezleri", "Tarihi yerler ziyareti", "Yerel pazar alışverişi", "Geleneksel yemek deneyimi"],
+            ["Doğa ve park ziyaretleri", "Alışveriş ve eğlence", "Kafeler ve barlar", "Veda akşam yemeği"],
+            ["Şehir dışı tur", "Yakın kasaba ziyareti", "Doğa aktiviteleri", "Yerel deneyimler"],
+            ["Sanat galerileri", "Tarihi mahalleler", "Yerel el sanatları", "Kültürel gösteriler"],
+            ["Şehir parkları", "Rekreasyon alanları", "Spor aktiviteleri", "Şehir gece hayatı"],
+            ["Son gün kahvaltısı", "Son alışveriş", "Şehre veda", "Dönüş hazırlığı"]
         ]
         
-        for day in range(1, min(plan_days + 1, 8)):
+        for day in range(min(plan_days, 7)):
+            current_day_index = (start_day_index + day) % 7
+            current_day_name = day_names[current_day_index]
             days.append({
-                "day": f"GÜN {day}",
-                "activities": general_activities[day - 1]
+                "day": current_day_name,
+                "activities": general_activities[day]
             })
         
         return {

@@ -14,7 +14,7 @@ Trip Navigator AI projesinde **Wikipedia Agent** kullanarak şehir bilgilerini o
 - ✅ **Veri İşleme**: Çekilen verileri temizler ve özetler
 - ✅ **Fallback Sistemi**: API çalışmazsa yerel veritabanından bilgi verir
 - ✅ **Çok Dilli Destek**: Türkçe Wikipedia API kullanır
-- ✅ **Koordinat Çekme**: Şehrin GPS koordinatlarını alır
+- ✅ **Şehir Bilgileri**: Şehrin detaylı bilgilerini alır
 - ✅ **Resim URL**: Şehir resmi varsa URL'ini çeker
 
 **Teknik Detaylar:**
@@ -32,7 +32,7 @@ class WikipediaAgent:
 
 **İşlemler:**
 - 📝 **Metin Özetleme**: 300 karaktere kısaltır
-- 🗺️ **Koordinat Çıkarma**: Lat/Lon bilgilerini alır
+- 🗺️ **Şehir Özeti**: Şehir bilgilerini özetler
 - 🖼️ **Resim URL**: Thumbnail URL'ini çıkarır
 - 🔗 **Link Oluşturma**: Wikipedia sayfa linkini oluşturur
 
@@ -42,8 +42,7 @@ class WikipediaAgent:
 
 **Özellikler:**
 - 🎨 **Gradient Kartlar**: Şehir bilgilerini renkli kartlarda gösterir
-- 📍 **Koordinat Gösterimi**: GPS bilgilerini gösterir
-- 🌟 **Öne Çıkan Yerler**: Şehrin önemli yerlerini listeler
+- 📍 **Şehir Bilgileri**: Şehir detaylarını gösterir
 - 🔗 **Wikipedia Linki**: Detaylı bilgi için link verir
 
 ## 🔄 Otomasyon Akışı
@@ -84,8 +83,7 @@ city_info = get_city_wikipedia_info("İstanbul")
     'city_name': 'İstanbul',
     'title': 'İstanbul',
     'summary': 'Türkiye\'nin en büyük şehri ve ekonomik merkezi...',
-    'latitude': 41.0082,
-    'longitude': 28.9784,
+    'image_url': 'https://upload.wikimedia.org/...',
     'image_url': 'https://upload.wikimedia.org/...',
     'wikipedia_url': 'https://tr.wikipedia.org/wiki/İstanbul',
     'source': 'Wikipedia'
