@@ -72,7 +72,7 @@ with col1:
     st.markdown("""
     <div class="step-card">
         <h4 style="color: white; margin-bottom: 0.5rem;">Seyahat Hedefini Belirt</h4>
-        <p style="color: white;">Nereye gitmek istediğini ve ne yapmak istediğini söyle</p>
+        <p style="color: white;">Nereye gitmek istediğini veya ne yapmak istediğini söyle</p>
     </div>
     """, unsafe_allow_html=True)
 

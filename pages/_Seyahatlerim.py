@@ -155,7 +155,7 @@ else:
                         city_info = None
 
                 if city_info:
-                    st.success(f"✅ {city_info['source']} kaynağından bilgiler alındı!")
+                    st.success(f"🌟​​ {city_name} ile tanışma zamanı!")
                     
                     # Şehir bilgilerini göster
                     st.markdown(f"""
