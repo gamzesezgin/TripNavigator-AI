@@ -165,7 +165,6 @@ else:
                         <p style="color: white; font-size: 1rem; line-height: 1.6;">{city_info['summary']}</p>
                     </div>
                     """, unsafe_allow_html=True)
-                   
                 else:
                     st.warning("❌ Şehir bilgileri alınamadı.")
             

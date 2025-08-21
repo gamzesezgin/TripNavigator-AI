@@ -107,7 +107,7 @@ def generate_ai_destination_recommendation(answers: List[str], ai_questions: Lis
 Bu tercihlere göre dünyadaki en uygun 3 destinasyon öner. 
 
 ÖNEMLİ: 
-- Eğer "Türkiye" seçildiyse, SADECE Türkiye içi destinasyonlar öner
+- Eğer "Türkiye" seçildiyse, SADECE Türkiye destinasyonları öner
 - Eğer "Avrupa" seçildiyse, SADECE Avrupa destinasyonları öner  
 - Eğer "Asya/Amerika/Afrika" seçildiyse, bu kıtalardan destinasyonlar öner
 
@@ -222,19 +222,19 @@ def generate_fallback_destinations(answers: List[str], ai_questions: List[Dict[s
         elif "asya" in answer.lower() or "amerika" in answer.lower() or "afrika" in answer.lower():
             distance_preference = "uzak"
     
-    # Türkiye içi destinasyonlar
+    # Türkiye destinasyonları
     if distance_preference == "türkiye":
         turkey_destinations = [
-            {"name": "İstanbul", "description": "Tarih, kültür ve modern yaşam"},
-            {"name": "Antalya", "description": "Plaj, tarih ve doğa"},
-            {"name": "Kapadokya", "description": "Doğal güzellikler ve tarih"},
-            {"name": "İzmir", "description": "Ege kültürü ve lezzetler"},
-            {"name": "Bursa", "description": "Tarih ve termal kaplıcalar"},
-            {"name": "Trabzon", "description": "Karadeniz doğası ve kültürü"},
-            {"name": "Konya", "description": "Tasavvuf kültürü ve tarih"},
-            {"name": "Gaziantep", "description": "Gastronomi ve tarih"},
-            {"name": "Mardin", "description": "Tarihi mimari ve kültür"},
-            {"name": "Van", "description": "Doğa ve tarih"}
+            {"name": "İstanbul, Türkiye", "description": "Tarih, kültür ve modern yaşam"},
+            {"name": "Antalya, Türkiye", "description": "Plaj, tarih ve doğa"},
+            {"name": "Kapadokya, Türkiye", "description": "Doğal güzellikler ve tarih"},
+            {"name": "İzmir, Türkiye", "description": "Ege kültürü ve lezzetler"},
+            {"name": "Bursa, Türkiye", "description": "Tarih ve termal kaplıcalar"},
+            {"name": "Trabzon, Türkiye", "description": "Karadeniz doğası ve kültürü"},
+            {"name": "Konya, Türkiye", "description": "Tasavvuf kültürü ve tarih"},
+            {"name": "Gaziantep, Türkiye", "description": "Gastronomi ve tarih"},
+            {"name": "Mardin, Türkiye", "description": "Tarihi mimari ve kültür"},
+            {"name": "Van, Türkiye", "description": "Doğa ve tarih"}
         ]
         
         # Kullanıcı tercihlerine göre filtrele
